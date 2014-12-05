@@ -38,18 +38,36 @@ namespace CocosSharp
         CCRenderTexture gridRenderTexture;
         CCTexture2D gridTexture;
         CCGrid3D grid3D;
-        CCSize gridTextureSizeInPoints;
         CCSize gridTextureSizeInPixels;
 
         public override CCGridBase Grid 
         {
             get 
             {
-                gridTextureSizeInPixels = Target.Scene.VisibleBoundsScreenspace.Size;
+                if (Target != null && Target.Scene.VisibleBoundsScreenspace.Size != CCSize.Zero)
+                {
+                    var texelToContentSizeRatios = CCSize.One;
+                    if (Target is CCSprite)
+                    {
+                        texelToContentSizeRatios = CCSprite.DefaultTexelToContentSizeRatios;
+                    }
+                    gridTextureSizeInPixels = Target.Scene.VisibleBoundsScreenspace.Size;
+                    gridTextureSizeInPixels.Width /= texelToContentSizeRatios.Width;
+                    gridTextureSizeInPixels.Height /= texelToContentSizeRatios.Height;
+                }
+                else
+                {
+                    // This probably serves no purpose but it keeps us from NRE's out
+                    gridTextureSizeInPixels = new CCSize(GridSize.X, GridSize.Y);
+                }
 
                 gridTexture = new CCTexture2D(
-                    (int)gridTextureSizeInPixels.Width, (int)gridTextureSizeInPixels.Height, CCSurfaceFormat.Color, true, false);
-                grid3D = new CCGrid3D (GridSize, gridTexture);
+                    (int)(gridTextureSizeInPixels.Width), 
+                    (int)(gridTextureSizeInPixels.Height), 
+                    CCSurfaceFormat.Color, 
+                    true, 
+                    false);
+                grid3D = new CCGrid3D(GridSize, gridTexture);
 
                 grid3D.Scene = Scene;
 
