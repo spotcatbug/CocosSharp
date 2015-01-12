@@ -304,7 +304,7 @@ namespace CocosSharp
                 CCSprite.DefaultTexelToContentSizeRatios = value;
                 CCLabelTtf.DefaultTexelToContentSizeRatios = value;
                 CCLabelBMFont.DefaultTexelToContentSizeRatios = value;
-                CCTMXLayer.DefaultTexelToContentSizeRatios = value;
+                CCTileMapLayer.DefaultTexelToContentSizeRatios = value;
             }
         }
 
@@ -1145,7 +1145,8 @@ namespace CocosSharp
             pos = TransformPoint(priorMouseState.X, Game.Window.ClientBounds.Height - priorMouseState.Y);
             #else
             //Because MonoGame and CocosSharp uses different Y axis, we need to convert the coordinate here
-            pos = new CCPoint(priorMouseState.X, Game.Window.ClientBounds.Height - priorMouseState.Y);
+            //No need to convert Y-Axis
+            pos = new CCPoint(priorMouseState.X, priorMouseState.Y);
             #endif
 
 
