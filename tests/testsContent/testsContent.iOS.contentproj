@@ -855,6 +855,76 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TileMaps\staggered_test.tmx">
+      <Name>staggered_test</Name>
+      <Importer>TMXImporter</Importer>
+      <Processor>TMXProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TileMaps\large_map.tmx">
+      <Name>staggered_test</Name>
+      <Importer>TMXImporter</Importer>
+      <Processor>TMXProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TileMaps\super_large_map.tmx">
+      <Name>staggered_test</Name>
+      <Importer>TMXImporter</Importer>
+      <Processor>TMXProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TileMaps\tilemap_no_encoding.tmx">
+      <Name>tilemap_no_encoding</Name>
+      <Importer>TMXImporter</Importer>
+      <Processor>TMXProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TileMaps\desert-palace.tmx">
+      <Name>tilemap_no_encoding</Name>
+      <Importer>TMXImporter</Importer>
+      <Processor>TMXProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TileMaps\animation_large_map.tmx">
+      <Name>tilemap_no_encoding</Name>
+      <Importer>TMXImporter</Importer>
+      <Processor>TMXProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TileMaps\animation_diff_tile_dim.tmx">
+      <Name>tilemap_no_encoding</Name>
+      <Importer>TMXImporter</Importer>
+      <Processor>TMXProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TileMaps\fixed-ortho-bgtiles.png">
+      <Name>fixed-ortho-bgtiles</Name>
+      <Importer>TextImporter</Importer>
+      <Processor>TextProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TileMaps\orthogonal-test-multilayer.tmx">
+      <Name>orthogonal-test-multilayer</Name>
+      <Importer>TMXImporter</Importer>
+      <Processor>TMXProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TileMaps\orthogonal-test-polylines.tmx">
+      <Name>orthogonal-test-polylines</Name>
+      <Importer>TMXImporter</Importer>
+      <Processor>TMXProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="TileMaps\orthogonal-test-zorder.tmx">
       <Name>orthogonal-test-zorder</Name>
       <Importer>TMXImporter</Importer>
@@ -877,6 +947,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="TileMaps\iso-test1.png">
+      <Name>iso-test1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>MGTextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TileMaps\desert-palace-tiles.png">
+      <Name>iso-test1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>MGTextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TileMaps\lamp-16x16.png">
       <Name>iso-test1</Name>
       <Importer>TextureImporter</Importer>
       <Processor>MGTextureProcessor</Processor>

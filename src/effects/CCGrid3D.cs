@@ -1,15 +1,21 @@
 using Microsoft.Xna.Framework.Graphics;
+using System.Runtime.InteropServices;
+using System;
 
 namespace CocosSharp
 {
     #region Structs
 
+#if IOS
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
+#endif
     internal struct CCV3F_T2F : IVertexType
     {
-        internal static readonly VertexDeclaration VertexDeclaration;
 
         internal CCVertex3F Vertices; // 12 bytes
         internal CCTex2F TexCoords; // 8 byts
+
+        internal static readonly VertexDeclaration VertexDeclaration;
 
         VertexDeclaration IVertexType.VertexDeclaration
         {
@@ -57,6 +63,25 @@ namespace CocosSharp
         #endregion Constructors
 
 
+        #region Cleaning up
+
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (disposing)
+            {
+                Indices = null;
+                OriginalVertices = null;
+                Vertices = null;
+                indexBuffer = null;
+                vertexBuffer = null;
+            }
+
+        }
+        #endregion
+
         #region Vertex Indexers
 
         public CCVertex3F this[CCGridSize pos]
@@ -88,7 +113,6 @@ namespace CocosSharp
         }
 
         #endregion Vertex Indexers
-
 
         public override void Blit()
         {

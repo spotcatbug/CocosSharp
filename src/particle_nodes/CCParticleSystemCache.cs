@@ -94,6 +94,7 @@ namespace CocosSharp
 		public CCParticleSystemCache(CCApplication application)
 			: this(application.Scheduler)
 		{
+            sharedParticleSystemCache = this;
 		}
 
 		CCParticleSystemCache(CCScheduler scheduler)
@@ -309,21 +310,23 @@ namespace CocosSharp
 			{
 				configs.TryGetValue(assetName, out psConfig);
 			}
+
 			if (psConfig == null)
 			{
-				psConfig = new CCParticleSystemConfig(fileConfig, directoryName, loadAsync);
+                try 
+                {
+				    psConfig = new CCParticleSystemConfig(fileConfig, directoryName, loadAsync);
 
-				if (psConfig != null)
-				{
 					lock (dictLock)
 					{
 						configs[assetName] = psConfig;
 					}
-				}
-				else
-				{
-					return null;
-				}
+                }
+                catch (Exception exc)
+                {
+                    CCLog.Log("Error creating configuration: {0}", fileConfig);
+                    return null;
+                }
 			}
 
 			return psConfig;

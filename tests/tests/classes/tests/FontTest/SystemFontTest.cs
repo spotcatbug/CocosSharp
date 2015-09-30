@@ -9,76 +9,67 @@ namespace tests.FontTest
 		private static readonly string[] fontList =
 		{
 #if IOS || IPHONE || MACOS
-			"Chalkboard SE",
+                "A Damn Mess.ttf",
+                "Abberancy.ttf",
+                "fonts/Abduction.ttf",
+                "fonts/American Typewriter.ttf",
+                "fonts/Courier New.ttf",
+                "Marker Felt.ttf",
+                "Paint Boy.ttf",
+                "fonts/Schwarzwald Regular.ttf",
+                "fonts/Scissor Cuts.ttf",
+                "tahoma.ttf",
+                "fonts/Thonburi.ttf",
+                "fonts/ThonburiBold.ttf",
+
 			"Chalkduster",
 			"Noteworthy",
 			"Marker Felt",
 			"Papyrus",
 			"American Typewriter",
 			"Arial",
-			"fonts/A Damn Mess.ttf",
-			"fonts/Abberancy.ttf",
-			"fonts/Abduction.ttf",
-			"fonts/American Typewriter.ttf",
-			"fonts/Courier New.ttf",
-			"fonts/Marker Felt.ttf",
-			"fonts/Paint Boy.ttf",
-			"fonts/Schwarzwald Regular.ttf",
-			"fonts/Scissor Cuts.ttf",
-			"fonts/tahoma.ttf",
-			"fonts/Thonburi.ttf",
-			"fonts/ThonburiBold.ttf"
 
 #endif
-#if WINDOWS || WINDOWSGL || NETFX_CORE
-            "A Damn Mess",  // A Damn Mess.ttf
-            "Abberancy",    // Abberancy.ttf
-            "Abduction",    //Abduction.ttf
-            "AmerType Md BT",  // American Typewriter.ttf
-            "Scissor Cuts", //Scissor Cuts.ttf
-            "Felt",         //Marker Felt.ttf
-            "arial",
-            "Courier New",
-            "Marker Felt",
+#if WINDOWS || NETFX_CORE || WINDOWSGL
+
+            "A Damn Mess.ttf",
+            "Abberancy.ttf",
+            "fonts/Abduction.ttf",
+            "American Typewriter.ttf",
+            "fonts/arial.ttf",
+            "fonts/Courier New.ttf",
+            "Marker Felt.ttf",
+            "Paint Boy.ttf",
+            "fonts/Schwarzwald Regular.ttf",
+            "Scissor Cuts.ttf",
+            "fonts/tahoma.ttf",
+            "fonts/Thonburi.ttf",
+            "fonts/ThonburiBold.ttf",
 			"Comic Sans MS",
-			"Felt",
 			"MoolBoran",
 			"Courier New",
 			"Georgia",
 			"Symbol",
             "Wingdings",
 			"Arial",
-
-            //"fonts/A Damn Mess.ttf",
-            //"fonts/Abberancy.ttf",
-            //"fonts/Abduction.ttf",
-            //"fonts/American Typewriter.ttf",
-            //"fonts/arial.ttf",
-            //"fonts/Courier New.ttf",
-            //"fonts/Marker Felt.ttf",
-            //"fonts/Paint Boy.ttf",
-            //"fonts/Schwarzwald Regular.ttf",
-            //"fonts/Scissor Cuts.ttf",
-            //"fonts/tahoma.ttf",
-            //"fonts/Thonburi.ttf",
-            //"fonts/ThonburiBold.ttf"
 #endif
+
 #if ANDROID
 			"Arial",
 			"Courier New",
 			"Georgia",
 
-            "fonts/A Damn Mess.ttf",
-            "fonts/Abberancy.ttf",
+            "A Damn Mess.ttf",
+            "Abberancy.ttf",
             "fonts/Abduction.ttf",
             "fonts/American Typewriter.ttf",
-            "fonts/arial.ttf",
+            "arial.ttf",
             "fonts/Courier New.ttf",
-            "fonts/Marker Felt.ttf",
-            "fonts/Paint Boy.ttf",
+            "Marker Felt.ttf",
+            "Paint Boy.ttf",
             "fonts/Schwarzwald Regular.ttf",
             "fonts/Scissor Cuts.ttf",
-            "fonts/tahoma.ttf",
+            "tahoma.ttf",
             "fonts/Thonburi.ttf",
             "fonts/ThonburiBold.ttf"
 #endif
@@ -208,19 +199,20 @@ namespace tests.FontTest
 			RemoveChildByTag(kTagLabel3, true);
 			RemoveChildByTag(kTagLabel4, true);
 
-            var top = new CCLabel(pFont,"Helvetica", 32);
+            var top = new CCLabel(pFont,"Helvetica", 32, CCLabelFormat.SystemFont);
 
             var center = new CCLabel("alignment center", pFont, fontSize,
-				blockSize, CCTextAlignment.Center,
-				SystemFontTestScene.verticalAlignment[SystemFontTestScene.verticalAlignIdx]);
+                blockSize, new CCLabelFormat( CCLabelFormatFlags.SystemFont ) { Alignment = CCTextAlignment.Center,
+                LineAlignment = SystemFontTestScene.verticalAlignment[SystemFontTestScene.verticalAlignIdx]}
+                );
 
             var left = new CCLabel("alignment left", pFont, fontSize,
-                blockSize, CCTextAlignment.Left,
-                SystemFontTestScene.verticalAlignment[SystemFontTestScene.verticalAlignIdx]);
+                blockSize, new CCLabelFormat( CCLabelFormatFlags.SystemFont ) { Alignment = CCTextAlignment.Left,
+                LineAlignment = SystemFontTestScene.verticalAlignment[SystemFontTestScene.verticalAlignIdx]});
 
 			var right = new CCLabel("alignment right", pFont, fontSize,
-				blockSize, CCTextAlignment.Right,
-				SystemFontTestScene.verticalAlignment[SystemFontTestScene.verticalAlignIdx]);
+                blockSize, new CCLabelFormat( CCLabelFormatFlags.SystemFont ) { Alignment = CCTextAlignment.Right,
+                LineAlignment = SystemFontTestScene.verticalAlignment[SystemFontTestScene.verticalAlignIdx]});
 
             top.AnchorPoint = CCPoint.AnchorMiddleTop;
             left.AnchorPoint = CCPoint.AnchorMiddleLeft;

@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace CocosSharp
 {
+    [Obsolete("CCDrawPrimitives is obsolete - Please use CCDrawNode")]
     public partial class CCDrawingPrimitives
     {
         static CCDrawManager drawManager;
@@ -268,6 +269,8 @@ namespace CocosSharp
         /// <param name="segments"></param>
         /// <param name="drawLineToCenter"></param>
         /// <param name="color"></param>
+        /// <param name="scaleX"></param>
+        /// <param name="scaleY"></param>
 		public static void DrawCircle(CCPoint center, float radius, float angle, int segments, bool drawLineToCenter, CCColor4B color, float scaleX = 1.0f, float scaleY = 1.0f)
         {
             float increment = MathHelper.Pi * 2.0f / segments;
@@ -299,7 +302,8 @@ namespace CocosSharp
 		/// <param name="angle">The amount of the circle to draw, in radiians</param>
 		/// <param name="segments"></param>
 		/// <param name="drawLineToCenter"></param>
-		/// <param name="color"></param>
+        /// <param name="scaleX"></param>
+        /// <param name="scaleY"></param>
 		public static void DrawCircle(CCPoint center, float radius, float angle, int segments, bool drawLineToCenter, float scaleX = 1.0f, float scaleY = 1.0f)
 		{
 			DrawCircle(center, radius, angle, segments, drawLineToCenter, DrawColor, scaleX, scaleY);
@@ -318,6 +322,8 @@ namespace CocosSharp
 		/// <param name="angle">The amount of the circle to draw, in radiians</param>
 		/// <param name="segments"></param>
 		/// <param name="color"></param>
+        /// <param name="scaleX"></param>
+        /// <param name="scaleY"></param>
 		public static void DrawSolidCircle(CCPoint center, float radius, float angle, int segments, CCColor4B color, float scaleX = 1.0f, float scaleY = 1.0f)
 		{
 			float increment = MathHelper.Pi * 2.0f / segments;
@@ -369,13 +375,13 @@ namespace CocosSharp
 			DrawEllipticalArc(rect, 0, 360, false, color);
 		}
 
-		public static void DrawEllips (int x, int y, int width, int height)
+		public static void DrawEllipse (int x, int y, int width, int height)
 		{
 			DrawEllipticalArc(x,y,width,height,0,360,false, DrawColor);
 
 		}
 
-		public static void DrawEllips (int x, int y, int width, int height, CCColor4B color)
+		public static void DrawEllipse (int x, int y, int width, int height, CCColor4B color)
         {
             DrawEllipticalArc(x,y,width,height,0,360,false, color);
             

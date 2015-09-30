@@ -35,21 +35,22 @@ namespace CocosSharp
     {
         public static CCCameraProjection DefaultCameraProjection = CCCameraProjection.Projection3D;
 
+        // A delegate type for hooking up Layer Visible Bounds change notifications.
+        internal delegate void LayerVisibleBoundsChangedEventHandler(object sender, EventArgs e);
+        internal event LayerVisibleBoundsChangedEventHandler LayerVisibleBoundsChanged;
+
         bool restoreScissor;
         bool noDrawChildren;
 
         CCCameraProjection initCameraProjection;
+        CCRect visibleBoundsWorldspace;
 
         CCRenderTexture renderTexture;
         CCClipMode childClippingMode;
         CCCamera camera;
 
-        CCRect visibleBoundsWorldspace;
-
-        // A delegate type for hooking up Layer Visible Bounds change notifications.
-        internal delegate void LayerVisibleBoundsChangedEventHandler(object sender, EventArgs e);
-        internal event LayerVisibleBoundsChangedEventHandler LayerVisibleBoundsChanged;
-
+        CCRenderCommand beforeDrawCommand;
+        CCRenderCommand afterDrawCommand;
 
         #region Properties
 
@@ -161,6 +162,9 @@ namespace CocosSharp
         public CCLayer(CCCameraProjection cameraProjection, CCClipMode clipMode = CCClipMode.None)
             : base()
         {
+            beforeDrawCommand = new CCCustomCommand(BeforeDraw);
+            afterDrawCommand = new CCCustomCommand(AfterDraw);
+
             ChildClippingMode = clipMode;
             IgnoreAnchorPointForPosition = true;
             AnchorPoint = CCPoint.AnchorMiddle;
@@ -185,6 +189,7 @@ namespace CocosSharp
         }
 
         #endregion Constructors
+
 
         #region Content layout
 
@@ -268,7 +273,7 @@ namespace CocosSharp
 
         #region Visiting and drawing
 
-        public override void Visit()
+        public override void Visit(ref CCAffineTransform parentWorldTransform)
         {
             if (!Visible || Window == null)
             {
@@ -278,72 +283,46 @@ namespace CocosSharp
             // Set camera view/proj matrix even if ChildClippingMode is None
             if(Camera != null)
             {
-                Window.DrawManager.ViewMatrix = Camera.ViewMatrix;
-                Window.DrawManager.ProjectionMatrix = Camera.ProjectionMatrix;
+                var viewMatrix = Camera.ViewMatrix;
+                var projMatrix = Camera.ProjectionMatrix;
+
+                Renderer.PushLayerGroup(ref viewMatrix, ref projMatrix);
             }
 
             if (ChildClippingMode == CCClipMode.None)
             {
-                base.Visit();
+                base.Visit(ref parentWorldTransform);
+
+                if(Camera != null)
+                    Renderer.PopLayerGroup();
+
                 return;
             }
 
-            Window.DrawManager.PushMatrix();
+            beforeDrawCommand.GlobalDepth = float.MinValue;
+            beforeDrawCommand.WorldTransform = parentWorldTransform;
+            Renderer.AddCommand(beforeDrawCommand);
 
-            if (Grid != null && Grid.Active)
-            {
-                Grid.BeforeDraw();
-                TransformAncestors();
-            }
+            VisitRenderer(ref parentWorldTransform);
 
-            Window.DrawManager.SetIdentityMatrix();
-
-            BeforeDraw();
-
-            if (!noDrawChildren && Children != null)
+            if(!noDrawChildren && Children != null)
             {
                 SortAllChildren();
-
-                CCNode[] arrayData = Children.Elements;
-                int count = Children.Count;
-                int i = 0;
-
-                // draw children zOrder < 0
-                for (; i < count; i++)
+                var elements = Children.Elements;
+                for(int i = 0, N = Children.Count; i < N; ++i)
                 {
-                    CCNode child = arrayData[i];
-                    if (child.ZOrder < 0)
-                    {
-                        if(child.Visible)
-                            child.Visit();
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                Draw();
-
-                // draw children zOrder >= 0
-                for (; i < count; i++)
-                {
-                    arrayData[i].Visit();
+                    var child = elements[i];
+                    if (child.Visible)
+                        child.Visit(ref parentWorldTransform);
                 }
             }
-            else
-            {
-                Draw();
-            }
 
-            AfterDraw();
+            afterDrawCommand.GlobalDepth = float.MaxValue;
+            afterDrawCommand.WorldTransform = parentWorldTransform;
+            Renderer.AddCommand(afterDrawCommand);
 
-            if (Grid != null && Grid.Active)
-            {
-                Grid.AfterDraw(this);
-            }
-
-            Window.DrawManager.PopMatrix();
+            if(Camera != null)
+                Renderer.PopLayerGroup();
         }
 
         void BeforeDraw()

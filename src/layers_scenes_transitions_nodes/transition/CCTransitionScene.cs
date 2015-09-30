@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace CocosSharp
 {
-    class CCTransitionSceneContainerNode: CCNode
+    class CCTransitionSceneContainerNode: CCNodeGrid
     {
         public CCScene InnerScene { get; private set; }
 
@@ -12,19 +12,16 @@ namespace CocosSharp
             InnerScene = scene;
         }
 
-        protected override void Draw()
+        protected override void VisitRenderer(ref CCAffineTransform worldTransform)
         {
-            base.Draw();
-
-            CCDrawManager drawManager = CCDrawManager.SharedDrawManager;
-
-            if(this.Visible)
-                InnerScene.Visit();
+            if(this.Visible && InnerScene != null)
+                InnerScene.Visit(ref worldTransform);
         }
     }
 
     class CCTransitionSceneContainerLayer : CCLayer
     {
+        bool isInSceneOnTop;
         CCTransitionSceneContainerNode inSceneNodeContainer;
         CCTransitionSceneContainerNode outSceneNodeContainer;
 
@@ -32,10 +29,28 @@ namespace CocosSharp
         internal CCNode OutSceneNodeContainer { get { return outSceneNodeContainer; } }
         internal CCScene InScene { get { return inSceneNodeContainer.InnerScene; } }
         internal CCScene OutScene { get { return outSceneNodeContainer.InnerScene; } }
-        internal bool IsInSceneOnTop { get; set; }
+        internal bool IsInSceneOnTop 
+        { 
+            get { return isInSceneOnTop; } 
+            set 
+            {
+                isInSceneOnTop = value;
+
+                if(isInSceneOnTop) 
+                {
+                    OutSceneNodeContainer.ZOrder = 0;
+                    InSceneNodeContainer.ZOrder = 1;
+                } 
+                else 
+                {
+                    OutSceneNodeContainer.ZOrder = 1;
+                    InSceneNodeContainer.ZOrder = 0;
+                }
+            }
+        }
 
         public CCTransitionSceneContainerLayer(CCScene inScene, CCScene outScene) 
-            : base(new CCCamera(CCCameraProjection.Projection2D, outScene.VisibleBoundsScreenspace.Size))
+            : base(new CCCamera(CCCameraProjection.Projection3D, outScene.VisibleBoundsScreenspace.Size))
         {
             CCSize contentSize = outScene.VisibleBoundsScreenspace.Size;
 
@@ -46,43 +61,11 @@ namespace CocosSharp
 
             // The trick here is that we're not actually adding the InScene/OutScene as children
             // This keeps the scenes' original parents (if they have one) intact, so that there's no cleanup afterwards
+
             AddChild(InSceneNodeContainer);
             AddChild(OutSceneNodeContainer);
+
         }
-
-        public override void Visit()
-        {
-            bool outSceneVisible = OutSceneNodeContainer.Visible;
-            bool inSceneVisible = InSceneNodeContainer.Visible;
-
-            CCDrawManager drawManager = CCDrawManager.SharedDrawManager;
-
-            base.Visit();
-
-            if (IsInSceneOnTop)
-            {
-                outSceneNodeContainer.Visit();
-                inSceneNodeContainer.Visit();
-            }
-            else
-            {
-                inSceneNodeContainer.Visit();
-                outSceneNodeContainer.Visit();
-            }
-        }
-
-        public override void OnExit()
-        {
-            base.OnExit();
-            outSceneNodeContainer.InnerScene.OnExit();
-        }
-
-        public override void OnExitTransitionDidStart()
-        {
-            base.OnExitTransitionDidStart();
-            outSceneNodeContainer.InnerScene.OnExitTransitionDidStart();
-        }
- 
     }
 
     public class CCTransitionScene : CCScene
@@ -168,9 +151,10 @@ namespace CocosSharp
             OutScene = outScene;
 
             transitionSceneContainerLayer = new CCTransitionSceneContainerLayer(InScene, OutScene);
-            AddChild(transitionSceneContainerLayer);
 
             SceneOrder();
+
+            AddChild(transitionSceneContainerLayer);
         }
 
         #endregion Constructors
@@ -186,13 +170,12 @@ namespace CocosSharp
             // Disable events while transitioning
             EventDispatcherIsEnabled = false;
 
+            // OutScene should not receive the OnEnter callback
+            // only the OnExitTransitionDidStart
+            OutScene.OnExitTransitionDidStart();
             InScene.OnEnter();
 
             InitialiseScenes();
-
-            OutSceneNodeContainer.OnEnter();
-            InSceneNodeContainer.OnEnter();
-
 
             if(InSceneAction != null)
                 InSceneNodeContainer.RunAction(InSceneAction);
@@ -209,6 +192,12 @@ namespace CocosSharp
 
             // Enable event after transitioning
             EventDispatcherIsEnabled = true;
+
+            OutScene.OnExit();
+
+            // InScene should not receive the OnEnter callback
+            // only the OnEnterTransitionDidFinish
+            InScene.OnEnterTransitionDidFinish();
         }
 
         public virtual void Reset(float t, CCScene scene)

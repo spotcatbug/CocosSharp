@@ -28,6 +28,9 @@
     <IncludeMonoRuntime>False</IncludeMonoRuntime>
     <UseSGen>False</UseSGen>
     <UseMSBuildEngine>False</UseMSBuildEngine>
+    <UseRefCounting>false</UseRefCounting>
+    <DocumentationFile>bin\MacOS\Debug\CocosSharp.XML</DocumentationFile>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -44,6 +47,9 @@
     <IncludeMonoRuntime>False</IncludeMonoRuntime>
     <UseSGen>False</UseSGen>
     <UseMSBuildEngine>False</UseMSBuildEngine>
+    <UseRefCounting>false</UseRefCounting>
+    <DocumentationFile>bin\MacOS\Release\CocosSharp.XML</DocumentationFile>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Distribution|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -58,6 +64,7 @@
     <IncludeMonoRuntime>False</IncludeMonoRuntime>
     <UseSGen>False</UseSGen>
     <UseMSBuildEngine>False</UseMSBuildEngine>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'DebugPhysics|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -75,6 +82,7 @@
     <CreatePackage>false</CreatePackage>
     <EnableCodeSigning>false</EnableCodeSigning>
     <EnablePackageSigning>false</EnablePackageSigning>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ReleasePhysics|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -91,6 +99,7 @@
     <CreatePackage>false</CreatePackage>
     <EnableCodeSigning>false</EnableCodeSigning>
     <IncludeMonoRuntime>false</IncludeMonoRuntime>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -98,9 +107,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Drawing" />
-    <Reference Include="ICSharpCode.SharpZipLib">
-      <HintPath>external lib\ICSharpCode.SharpZipLib.dll</HintPath>
-    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="XamMac" />
   </ItemGroup>
@@ -284,7 +290,6 @@
     <Compile Include="misc_nodes\CCRenderTexture.cs" />
     <Compile Include="misc_nodes\CCClippingNode.cs" />
     <Compile Include="misc_nodes\CCDrawNode.cs" />
-    <Compile Include="particle_nodes\CCParticleBatchNode.cs" />
     <Compile Include="particle_nodes\CCParticleExamples.cs" />
     <Compile Include="particle_nodes\CCParticleSystem.cs" />
     <Compile Include="particle_nodes\CCParticleSystemQuad.cs" />
@@ -318,20 +323,6 @@
     <Compile Include="Platform\CCRawList.cs" />
     <Compile Include="Platform\CCArrayPool.cs" />
     <Compile Include="Platform\CCReusedObject.cs" />
-    <Compile Include="Platform\Zlib\Adler32.cs" />
-    <Compile Include="Platform\Zlib\Deflate.cs" />
-    <Compile Include="Platform\Zlib\InfBlocks.cs" />
-    <Compile Include="Platform\Zlib\InfCodes.cs" />
-    <Compile Include="Platform\Zlib\Inflate.cs" />
-    <Compile Include="Platform\Zlib\InfTree.cs" />
-    <Compile Include="Platform\Zlib\StaticTree.cs" />
-    <Compile Include="Platform\Zlib\SupportClass.cs" />
-    <Compile Include="Platform\Zlib\Tree.cs" />
-    <Compile Include="Platform\Zlib\ZInputStream.cs" />
-    <Compile Include="Platform\Zlib\Zlib.cs" />
-    <Compile Include="Platform\Zlib\ZOutputStream.cs" />
-    <Compile Include="Platform\Zlib\ZStream.cs" />
-    <Compile Include="Platform\Zlib\ZStreamException.cs" />
     <Compile Include="predefine\CCMacros.cs" />
     <Compile Include="predefine\CCProtocols.cs" />
     <Compile Include="predefine\CCTouch.cs" />
@@ -402,7 +393,6 @@
     <Compile Include="particle_nodes\CCParticleSystemConfig.cs" />
     <Compile Include="particle_nodes\CCParticleSystemCache.cs" />
     <Compile Include="denshion\CCMusicPlayer.AVFoundation.cs" />
-    <Compile Include="denshion\CCEffectPlayer.AVFoundation.cs" />
     <Compile Include="CCWindow.cs" />
     <Compile Include="CCViewport.cs" />
     <Compile Include="Actions\action_intervals\CCExtraAction.cs" />
@@ -416,12 +406,32 @@
     <Compile Include="tileMap_parallax_nodes\CCTileMapObjectGroup.cs" />
     <Compile Include="tileMap_parallax_nodes\CCTileSetInfo.cs" />
     <Compile Include="tileMap_parallax_nodes\CCTileLayerInfo.cs" />
+    <Compile Include="misc_nodes\CCNodeGrid.cs" />
+    <Compile Include="label_nodes\CCTextLayout.cs" />
+    <Compile Include="label_nodes\CCFontAtlasCache.cs" />
+    <Compile Include="label_nodes\CCFont.cs" />
+    <Compile Include="label_nodes\CCFontAtlas.cs" />
+    <Compile Include="label_nodes\CCFontFNT.cs" />
+    <Compile Include="label_nodes\CCFontSpriteFont.cs" />
+    <Compile Include="tileMap_parallax_nodes\CCTileAnimation.cs" />
+    <Compile Include="Renderer\CCRenderer.cs" />
+    <Compile Include="Renderer\RenderCommands\CCRenderCommand.cs" />
+    <Compile Include="Renderer\RenderCommands\CCQuadCommand.cs" />
+    <Compile Include="Renderer\RenderCommands\CCCustomCommand.cs" />
+    <Compile Include="misc_nodes\CCGeometryNode.cs" />
+    <Compile Include="denshion\CCEffectPlayer.MonoGame.cs" />
+    <Compile Include="text_input_node\CCTextField.cs" />
+    <Compile Include="text_input_node\CCIMEKeyboardEventArgs.cs" />
+    <Compile Include="Platform\Keyboard\MacOSX\IMEKeyboardImpl.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="support\Converters\" />
     <Folder Include="support\Serialization\" />
     <Folder Include="events\" />
     <Folder Include="physics\" />
+    <Folder Include="Renderer\" />
+    <Folder Include="Renderer\RenderCommands\" />
+    <Folder Include="Platform\Keyboard\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MonoGame\ThirdParty\Lidgren.Network\Lidgren.Network.MacOS.csproj">
@@ -435,10 +445,6 @@
     <ProjectReference Include="..\MonoGame\MonoGame.Framework\MonoGame.Framework.Net.MacOS.csproj">
       <Project>{1294038B-66C2-4359-AFE9-EA06A758CA94}</Project>
       <Name>MonoGame.Framework.Net.MacOS</Name>
-    </ProjectReference>
-    <ProjectReference Include="external lib\ChipmunkSharp\src\ChipmunkSharp\win32\ChipmunkSharp.Mac.csproj">
-      <Project>{FD50437F-B756-4BD8-99BE-B723F6E1EB45}</Project>
-      <Name>ChipmunkSharp.Mac</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

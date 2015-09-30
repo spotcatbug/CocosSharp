@@ -29,6 +29,7 @@
     <MtouchLink>None</MtouchLink>
     <MtouchDebug>True</MtouchDebug>
     <MtouchUseArmv7>false</MtouchUseArmv7>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>none</DebugType>
@@ -39,6 +40,7 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <DefineConstants>IPHONE;IOS;GLES;OPENGL;MONOGAME</DefineConstants>
     <MtouchUseArmv7>false</MtouchUseArmv7>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
     <DebugSymbols>True</DebugSymbols>
@@ -52,6 +54,8 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <MtouchDebug>True</MtouchDebug>
     <MtouchUseArmv7>false</MtouchUseArmv7>
+    <DocumentationFile>bin\iPhone\Debug\CocosSharp.XML</DocumentationFile>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
@@ -62,14 +66,13 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <DefineConstants>IPHONE;IOS;GLES;OPENGL;MONOGAME</DefineConstants>
     <MtouchUseArmv7>false</MtouchUseArmv7>
+    <DocumentationFile>bin\iPhone\Release\CocosSharp.XML</DocumentationFile>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
-    <Reference Include="ICSharpCode.SharpZipLib">
-      <HintPath>external lib\ICSharpCode.SharpZipLib.dll</HintPath>
-    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="Xamarin.iOS" />
     <Reference Include="OpenTK-1.0" />
@@ -262,7 +265,6 @@
     <Compile Include="misc_nodes\CCRenderTexture.cs" />
     <Compile Include="misc_nodes\CCClippingNode.cs" />
     <Compile Include="misc_nodes\CCDrawNode.cs" />
-    <Compile Include="particle_nodes\CCParticleBatchNode.cs" />
     <Compile Include="particle_nodes\CCParticleExamples.cs" />
     <Compile Include="particle_nodes\CCParticleSystem.cs" />
     <Compile Include="particle_nodes\CCParticleSystemQuad.cs" />
@@ -289,20 +291,6 @@
     <Compile Include="Platform\PList\PlistObjectBase.cs" />
     <Compile Include="Platform\PList\PlistReal.cs" />
     <Compile Include="Platform\PList\PlistString.cs" />
-    <Compile Include="Platform\Zlib\Adler32.cs" />
-    <Compile Include="Platform\Zlib\Deflate.cs" />
-    <Compile Include="Platform\Zlib\InfBlocks.cs" />
-    <Compile Include="Platform\Zlib\InfCodes.cs" />
-    <Compile Include="Platform\Zlib\Inflate.cs" />
-    <Compile Include="Platform\Zlib\InfTree.cs" />
-    <Compile Include="Platform\Zlib\StaticTree.cs" />
-    <Compile Include="Platform\Zlib\SupportClass.cs" />
-    <Compile Include="Platform\Zlib\Tree.cs" />
-    <Compile Include="Platform\Zlib\ZInputStream.cs" />
-    <Compile Include="Platform\Zlib\Zlib.cs" />
-    <Compile Include="Platform\Zlib\ZOutputStream.cs" />
-    <Compile Include="Platform\Zlib\ZStream.cs" />
-    <Compile Include="Platform\Zlib\ZStreamException.cs" />
     <Compile Include="predefine\CCProtocols.cs" />
     <Compile Include="predefine\CCTouch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -323,9 +311,7 @@
     <Compile Include="textures\CCTextureAtlas.cs" />
     <Compile Include="textures\CCTextureCache.cs" />
     <Compile Include="text_input_node\CCIMEKeyboardNotificationInfo.cs" />
-    <Compile Include="text_input_node\CCTextFieldTTF.cs" />
     <Compile Include="text_input_node\ICCIMEDelegate.cs" />
-    <Compile Include="text_input_node\ICCTextFieldDelegate.cs" />
     <Compile Include="tileMap_parallax_nodes\CCParallaxNode.cs" />
     <Compile Include="tileMap_parallax_nodes\CCPointObject.cs" />
     <Compile Include="Platform\CCFocusManager.cs" />
@@ -392,7 +378,6 @@
     <Compile Include="events\CCEventListenerCustom.cs" />
     <Compile Include="particle_nodes\CCParticleSystemCache.cs" />
     <Compile Include="denshion\CCMusicPlayer.AVFoundation.cs" />
-    <Compile Include="denshion\CCEffectPlayer.AVFoundation.cs" />
     <Compile Include="tileMap_parallax_nodes\CCTileLayerInfo.cs" />
     <Compile Include="tileMap_parallax_nodes\CCTileMap.cs" />
     <Compile Include="tileMap_parallax_nodes\CCTileMapInfo.cs" />
@@ -400,6 +385,23 @@
     <Compile Include="tileMap_parallax_nodes\CCTileMapObjectGroup.cs" />
     <Compile Include="tileMap_parallax_nodes\CCTileMapStructs.cs" />
     <Compile Include="tileMap_parallax_nodes\CCTileSetInfo.cs" />
+    <Compile Include="misc_nodes\CCNodeGrid.cs" />
+    <Compile Include="label_nodes\CCFont.cs" />
+    <Compile Include="label_nodes\CCFontAtlas.cs" />
+    <Compile Include="label_nodes\CCFontAtlasCache.cs" />
+    <Compile Include="label_nodes\CCFontFNT.cs" />
+    <Compile Include="label_nodes\CCFontSpriteFont.cs" />
+    <Compile Include="label_nodes\CCTextLayout.cs" />
+    <Compile Include="tileMap_parallax_nodes\CCTileAnimation.cs" />
+    <Compile Include="Renderer\CCRenderer.cs" />
+    <Compile Include="Renderer\RenderCommands\CCCustomCommand.cs" />
+    <Compile Include="Renderer\RenderCommands\CCQuadCommand.cs" />
+    <Compile Include="Renderer\RenderCommands\CCRenderCommand.cs" />
+    <Compile Include="misc_nodes\CCGeometryNode.cs" />
+    <Compile Include="denshion\CCEffectPlayer.MonoGame.cs" />
+    <Compile Include="text_input_node\CCTextField.cs" />
+    <Compile Include="Platform\Keyboard\IOS\IMEKeyboardImpl.cs" />
+    <Compile Include="text_input_node\CCIMEKeyboardEventArgs.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup />
@@ -422,5 +424,7 @@
       <Name>MonoGame.Framework.Net.iOS</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
+  <ItemGroup />
   <ItemGroup />
 </Project>

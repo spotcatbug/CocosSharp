@@ -25,7 +25,7 @@ namespace CocosSharp
 
         protected internal override CCActionState StartAction(CCNode target)
         {
-            return new CCFlipX3DState (this, target);
+            return new CCFlipX3DState (this, GridNode(target));
         }
     }
 
@@ -34,12 +34,16 @@ namespace CocosSharp
 
     public class CCFlipX3DState : CCGrid3DActionState
     {
-        public CCFlipX3DState (CCFlipX3D action, CCNode target) : base (action, target)
+        public CCFlipX3DState (CCFlipX3D action, CCNodeGrid target) : base (action, target)
         {
         }
 
         public override void Update (float time)
         {
+
+            if (Target == null)
+                return;
+            
             float angle = (float)Math.PI * time; // 180 degrees
             var mz = (float)Math.Sin (angle);
             angle = angle / 2.0f; // x calculates degrees from 0 to 90

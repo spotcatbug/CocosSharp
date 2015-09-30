@@ -26,6 +26,7 @@
     <EnablePackageSigning>False</EnablePackageSigning>
     <IncludeMonoRuntime>False</IncludeMonoRuntime>
     <UseSGen>False</UseSGen>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>none</DebugType>
@@ -41,6 +42,7 @@
     <EnablePackageSigning>False</EnablePackageSigning>
     <IncludeMonoRuntime>False</IncludeMonoRuntime>
     <UseSGen>False</UseSGen>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -56,6 +58,7 @@
     <EnableCodeSigning>False</EnableCodeSigning>
     <EnablePackageSigning>False</EnablePackageSigning>
     <CreatePackage>False</CreatePackage>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -72,6 +75,7 @@
     <EnableCodeSigning>False</EnableCodeSigning>
     <EnablePackageSigning>False</EnablePackageSigning>
     <CreatePackage>False</CreatePackage>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'DebugPhysics|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -88,6 +92,7 @@
     <CreatePackage>false</CreatePackage>
     <EnableCodeSigning>false</EnableCodeSigning>
     <EnablePackageSigning>false</EnablePackageSigning>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ReleasePhysics|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -103,6 +108,7 @@
     <CreatePackage>false</CreatePackage>
     <EnableCodeSigning>false</EnableCodeSigning>
     <EnablePackageSigning>false</EnablePackageSigning>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -111,13 +117,13 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Drawing" />
     <Reference Include="XamMac" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ball-hd.mask" />
     <EmbeddedResource Include="grossini.mask" />
     <Compile Include="classes\AppDelegate.cs" />
     <Compile Include="classes\controller.cs" />
-    <Compile Include="classes\test.cs" />
     <Compile Include="classes\testBasic.cs" />
     <Compile Include="classes\testResource.cs" />
     <Compile Include="classes\tests\AccelerometerTest\AccelerometerTest.cs" />
@@ -356,9 +362,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="classes\tests\LabelTest\Atlas1.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="classes\tests\LabelTest\Atlas3.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="classes\tests\LabelTest\Atlas4.cs">
@@ -1143,6 +1146,102 @@
     </Compile>
     <Compile Include="classes\TestNavigationLayer.cs" />
     <Compile Include="classes\tests\Physics\PhysicsTest.cs" />
+    <Compile Include="classes\tests\LabelTest\Atlas3.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\AtlasTestSceneNew.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelTestNew.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTColorAndOpacity.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTSpriteActions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTPadding.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTOffset.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTMultiLine.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTMultiLineAlignment.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelSFLongLineWrapping.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTBounds.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTUNICODELanguages.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTColor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTHundredLabels.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTandSFEmpty.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTRetina.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTGlyphDesigner.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelTTFUnicodeChinese.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelTTFAlignmentNew.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontUnicodeJapanese.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelSFColor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontColor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelTTFFontsTestNew.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelSFAlignmentTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontAlignmentTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelSFOldNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTOldNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTFlippedY.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTLineHeightTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTAdditionalKerningTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTContentSizeRatios.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFContentSizeRatios.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFont168.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontRenderTexture.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontColorAndOpacity.cs" />
+    <Compile Include="classes\tests\TextInputTest\CustomIME\UppercaseIMEKeyboardImpl.cs" />
+    <Compile Include="classes\tests\RendererTest\RendererTestDemo.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFSTextureView.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="PhoneGameThumb_iPad.png" />
@@ -2499,6 +2598,61 @@
     <Content Include="Assets\Content\Images\YellowSquare.xnb">
       <Link>Content\Images\YellowSquare.xnb</Link>
     </Content>
+    <Content Include="..\testsContent\TileMaps\iso-test-zorder1.tmx">
+      <Link>Content\TileMaps\iso-test-zorder1.tmx</Link>
+    </Content>
+    <Content Include="Content\TileMaps\tilemap_no_encoding.xnb" />
+    <Content Include="Content\TileMaps\fixed-ortho-bgtiles.xnb" />
+    <Content Include="Content\TileMaps\orthogonal-test-multilayer.xnb" />
+    <Content Include="Content\TileMaps\orthogonal-test-polylines.xnb" />
+    <Content Include="Content\TileMaps\staggered_test.xnb" />
+    <Content Include="Content\TileMaps\large_map.xnb" />
+    <Content Include="Content\TileMaps\super_large_map.xnb" />
+    <Content Include="..\testsContent\fonts\boundsTestFont.fnt">
+      <Link>Content\fonts\boundsTestFont.fnt</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\arial-26-en-ru_0.png">
+      <Link>Content\fonts\arial-26-en-ru_0.png</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\arial-26-en-ru.fnt">
+      <Link>Content\fonts\arial-26-en-ru.fnt</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\HKYuanMini.ttf">
+      <Link>Content\fonts\HKYuanMini.ttf</Link>
+    </Content>
+    <Content Include="Assets\Content\fonts\tahoma.ttf">
+      <Link>Content\fonts\tahoma.ttf</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\American Typewriter.ttf">
+      <Link>Content\fonts\American Typewriter.ttf</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\Schwarzwald.ttf">
+      <Link>Content\fonts\Schwarzwald.ttf</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\Courier New.ttf">
+      <Link>Content\fonts\Courier New.ttf</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\Marker Felt.ttf">
+      <Link>Content\fonts\Marker Felt.ttf</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\MorrisRoman-Black.ttf">
+      <Link>Content\fonts\MorrisRoman-Black.ttf</Link>
+    </Content>
+    <Content Include="Content\TileMaps\animation_diff_tile_dim.xnb" />
+    <Content Include="Content\TileMaps\animation_large_map.xnb" />
+    <Content Include="Content\TileMaps\desert-palace.xnb" />
+    <Content Include="Content\TileMaps\lamp-16x16.xnb" />
+    <Content Include="Content\TileMaps\desert-palace-tiles.xnb" />
+    <Content Include="Content\TileMaps\desert-palace-multi-tileset.xnb" />
+    <Content Include="Content\TileMaps\people.xnb" />
+    <Content Include="Content\Images\animationbuttonnormal.xnb" />
+    <Content Include="Content\Images\animationbuttonpressed.xnb" />
+    <Content Include="Assets\Content\fonts\debugcompressed.xnb">
+      <Link>Content\fonts\debugcompressed.xnb</Link>
+    </Content>
+    <Content Include="Assets\Content\fonts\debuguncompressed.xnb">
+      <Link>Content\fonts\debuguncompressed.xnb</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="classes\tests\ExtensionsTest\ControlExtensionTest\CCControlButtonTest\CCControlButtonTest.cs" />
@@ -2547,9 +2701,6 @@
     <None Include="Info.Mac.plist">
       <Link>Info.plist</Link>
     </None>
-    <None Include="Assets\Content\fonts\tahoma.ttf">
-      <Link>Content\fonts\tahoma.ttf</Link>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\" />
@@ -2558,5 +2709,13 @@
     <Folder Include="classes\tests\EventDispatcherTest\" />
     <Folder Include="Extensions\" />
     <Folder Include="classes\tests\Physics\" />
+    <Folder Include="classes\tests\LabelTestNew\" />
+    <Folder Include="classes\tests\TextInputTest\CustomIME\" />
+    <Folder Include="classes\tests\RendererTest\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="..\testsContent\fonts\boundsTestFont_0.png">
+      <Link>Content\fonts\boundsTestFont_0.png</Link>
+    </BundleResource>
   </ItemGroup>
 </Project>

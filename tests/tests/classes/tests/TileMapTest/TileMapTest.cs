@@ -212,17 +212,72 @@ namespace tests
 
     public class TMXHexTest : TileDemo
     {
+        CCDrawNode drawNode;
+
         public TMXHexTest() : base("TileMaps/hexa-test1")
         {
             CCLayerColor color = new CCLayerColor(new CCColor4B(64, 64, 64, 255));
             AddChild(color, -1);
+
+            drawNode = new CCDrawNode();
+            tileLayersContainer.AddChild(drawNode);
+
+            var touchListener = new CCEventListenerTouchOneByOne();
+            touchListener.OnTouchBegan = OnTouchBegan;
+
+            AddEventListener(touchListener);
         }
 
 		public override string Title
 		{
 			get
-			{ return "TMX Hex tes"; }
+			{ return "TMX Hex test"; }
 		}
+
+        bool OnTouchBegan(CCTouch touch, CCEvent touchEvent)
+        {
+
+            var layer = tileMap.LayerNamed("Layer 0");
+
+            var location = layer.WorldToParentspace(touch.Location);
+            var tileCoordinates = layer.ClosestTileCoordAtNodePosition(location);
+
+            // Convert the tile coordinates position to world coordinates for
+            // our outline drawing
+            var world = layer.TilePosition(tileCoordinates);
+
+
+            // Calculate our width and height of the tile
+            CCSize texToContentScaling = CCTileMapLayer.DefaultTexelToContentSizeRatios;
+            float width = layer.TileTexelSize.Width * texToContentScaling.Width;
+            float height = layer.TileTexelSize.Height * texToContentScaling.Height;
+
+            var rect = new CCRect(world.X, world.Y, width, height);
+
+            drawNode.Clear();
+
+            drawNode.Color = CCColor3B.Magenta;
+            drawNode.Opacity = 255;
+
+            var center = rect.Center;
+
+            var right = center;
+            right.X += width / 2;
+
+            var top = center;
+            top.Y += height / 2;
+
+            var left = right;
+            left.X -= width;
+
+            var bottom = center;
+            bottom.Y -= height / 2;
+
+            // Hightlight our iso tile
+            drawNode.DrawPolygon (new CCPoint[] {right, top, left, bottom}, 4, CCColor4B.Transparent, 1, new CCColor4F(CCColor4B.Magenta));
+
+            return true;
+        }
     }
 
     public class TMXIsoTest : TileDemo
@@ -295,7 +350,7 @@ namespace tests
             // move map to the center of the screen
             var ms = tileMap.MapDimensions;
             var ts = tileMap.TileTexelSize;
-            tileMap.RunAction(new CCMoveTo (1.0f, new CCPoint(-ms.Column * ts.Width / 2, -ms.Row * ts.Height / 2)));
+            tileLayersContainer.RunAction(new CCMoveTo (1.0f, new CCPoint(-ms.Column * ts.Width / 2, -ms.Row * ts.Height / 2)));
         }
 
 		public override string Title
@@ -485,6 +540,68 @@ namespace tests
 			get { return "Sprite should hide behind the trees"; }
 		}
     }
+
+    public class TMXIsoZorderFromStream : TileDemo
+    {
+        readonly CCSprite m_tamara;
+
+        static readonly CCMoveBy move = new CCMoveBy (10, new CCPoint(300, 250));
+        static readonly CCFiniteTimeAction back = move.Reverse();
+
+        public TMXIsoZorderFromStream() : base(new System.IO.StreamReader(CCFileUtils.GetFileStream("TileMaps/iso-test-zorder1.tmx")))
+        {
+            m_tamara = new CCSprite(pathSister1);
+            tileLayersContainer.AddChild(m_tamara, tileMap.Children.Count);
+            tileLayersContainer.Position = new CCPoint(-50.0f, -50.0f);
+
+            m_tamara.AnchorPoint = CCPoint.Zero;
+
+            m_tamara.RepeatForever(move, back);
+
+            Schedule(repositionSprite);
+        }
+
+        protected override void AddedToScene()
+        {
+            base.AddedToScene();
+
+            m_tamara.Position = tileMap.LayerNamed("grass").TilePosition(29, 29);
+        }
+
+
+        public override void OnExit()
+        {
+            Unschedule(repositionSprite);
+            base.OnExit();
+        }
+
+        private void repositionSprite(float dt)
+        {
+            CCPoint p = m_tamara.Position;
+
+
+            // there are only 4 layers. (grass and 3 trees layers)
+            // if tamara < 48, z=4
+            // if tamara < 96, z=3
+            // if tamara < 144,z=2
+
+            int newZ = (int)(4 - (p.Y / 48));
+            newZ = Math.Max(newZ, 0);
+
+            tileLayersContainer.ReorderChild(m_tamara, newZ);
+        }
+
+        public override string Title
+        {
+            get { return "TMX Iso Zorder using StreamReader"; }
+        }
+
+        public override string Subtitle
+        {
+            get { return "Sprite should hide behind the trees"; }
+        }
+    }
+
 
     public class TMXOrthoZorder : TileDemo
     {
@@ -836,7 +953,7 @@ namespace tests
     {
         public TMXBug787() : base("TileMaps/iso-test-bug787")
         {
-            tileMap.Scale = (0.25f);
+            tileLayersContainer.Scale = (0.25f);
         }
 
 		public override string Title
@@ -860,6 +977,20 @@ namespace tests
         protected CCNode tileLayersContainer;
 
 		protected CCScaleBy SCALE_2X_Half = new CCScaleBy(2, 0.5f);
+
+        public TileDemo (System.IO.StreamReader tilemapReader )
+        {
+            tileMap = new CCTileMap(tilemapReader);
+            tileLayersContainer = tileMap.TileLayersContainer;
+
+            AddChild(tileMap);
+
+            // Register Touch Event
+            var touchListener = new CCEventListenerTouchAllAtOnce();
+            touchListener.OnTouchesMoved = onTouchesMoved;
+
+            AddEventListener(touchListener);
+        }
 
         public TileDemo(string tilemapName)
         {
@@ -1002,7 +1133,7 @@ namespace tests
     public class TileMapTestScene : TestScene
     {
         static int sceneIdx = -1;
-        static int MAX_LAYER = 27;
+        static int MAX_LAYER = 40;
 
         static CCLayer createTileMapLayer(int nIndex)
         {
@@ -1124,6 +1255,32 @@ namespace tests
                     return new TMXGIDObjectsTest();
                 case 26:
                     return new IsoNodePosition();
+                case 27:
+                    return new TMXIsoZorderFromStream();
+                case 28:
+                    return new TMXNoEncodingTest();
+                case 29:
+                    return new TMXPolylineTest();
+                case 30:
+                    return new TMXMultiLayerTest();
+                case 31:
+                    return new TMXStaggeredMapTest();
+                case 32:
+                    return new TMXLargeMapTest();
+                case 33:
+                    return new TMXLargeMapScalingTest();
+                case 34:
+                    return new TMXSuperLargeMapTest();
+                case 35:
+                    return new TMXTileDifferentTileDimAnimationTest();
+                case 36:
+                    return new TMXAnimationLargeMapTest();
+                case 37:
+                    return new TMXTileAnimationTest();
+                case 38:
+                    return new TMXLayerWithMutiTilesets();
+                case 39:
+                    return new TMXLayerRepositionTileLayer();
 #endif
             }
 
@@ -1200,33 +1357,29 @@ namespace tests
 
     public class TMXGIDObjectsTest : TileDemo
     {
+        CCDrawNode drawNode;
+
         public TMXGIDObjectsTest() : base("TileMaps/test-object-layer")
         {
+            drawNode = new CCDrawNode();
+            tileLayersContainer.AddChild(drawNode);
         }
 
-        protected override void Draw()
+        protected override void AddedToScene ()
         {
+            base.AddedToScene();
             CCTileMapObjectGroup group = tileMap.ObjectGroupNamed("Object Layer 1");
+
+            drawNode.Color = CCColor3B.Magenta;
+            drawNode.Opacity = 255;
+            drawNode.Clear();
 
             foreach (var dict in group.Objects)
             {
                 int x = int.Parse(dict["x"]);
                 int y = int.Parse(dict["y"]);
-                int width = dict.ContainsKey("width") ? int.Parse(dict["width"]) : 0;
-                int height = dict.ContainsKey("height") ? int.Parse(dict["height"]) : 0;
-
-                //glLineWidth(3);
-
-                var color = new CCColor4B(255, 255, 0, 255);
-
-                CCDrawingPrimitives.Begin();
-                CCDrawingPrimitives.DrawLine(new CCPoint(x, y), new CCPoint(x + width, y), color);
-                CCDrawingPrimitives.DrawLine(new CCPoint(x + width, y), new CCPoint(x + width, y + height), color);
-                CCDrawingPrimitives.DrawLine(new CCPoint(x + width, y + height), new CCPoint(x, y + height), color);
-                CCDrawingPrimitives.DrawLine(new CCPoint(x, y + height), new CCPoint(x, y), color);
-                CCDrawingPrimitives.End();
-
-                //glLineWidth(1);
+;
+                drawNode.DrawSolidCircle(new CCPoint (x, y), 10.0f, new CCColor4F (CCColor4B.Magenta));
             }
         }
 
@@ -1245,5 +1398,363 @@ namespace tests
 				return "Tiles are created from an object group";
 			}
 		}
+    }
+
+    public class TMXNoEncodingTest : TileDemo
+    {
+        public TMXNoEncodingTest() : base("TileMaps/tilemap_no_encoding")
+        {
+        }
+
+        public override string Title
+        {
+            get { return "TMX No Encoding"; }
+        }
+    }
+
+    public class TMXLargeMapTest : TileDemo
+    {
+        public TMXLargeMapTest() : base("TileMaps/large_map")
+        {
+        }
+
+        public override string Title
+        {
+            get { return "TMX Large map"; }
+        }
+    }
+
+    public class TMXLargeMapScalingTest : TileDemo
+    {
+        public TMXLargeMapScalingTest() : base("TileMaps/large_map")
+        {
+            var action = new CCRepeatForever(new CCSequence(new CCScaleTo(2.0f, 0.5f), new CCScaleTo(2.0f, 2f)));
+            tileLayersContainer.RunAction(action);
+        }
+
+        public override string Title
+        {
+            get { return "TMX Large map"; }
+        }
+
+        public override string Subtitle
+        {
+            get { return "Making sure culling handles scaling of map"; }
+        }
+    }
+
+    public class TMXTileAnimationTest : TileDemo
+    {
+        public TMXTileAnimationTest() : base("TileMaps/desert-palace")
+        {
+        }
+
+        public override string Title
+        {
+            get { return "Tile animation"; }
+        }
+
+        public override string Subtitle
+        {
+            get { return "Water and lamp should be animated"; }
+        }
+    }
+
+    public class TMXTileDifferentTileDimAnimationTest : TileDemo
+    {
+        public TMXTileDifferentTileDimAnimationTest() : base("TileMaps/animation_diff_tile_dim")
+        {
+        }
+
+        public override string Title
+        {
+            get { return "Tile animation"; }
+        }
+
+        public override string Subtitle
+        {
+            get { return "Should correctly handle cycling over tiles with different dimensions"; }
+        }
+    }
+
+    public class TMXAnimationLargeMapTest : TileDemo
+    {
+        public TMXAnimationLargeMapTest() : base("TileMaps/animation_large_map")
+        {
+        }
+
+        public override string Title
+        {
+            get { return "Tile animation"; }
+        }
+
+        public override string Subtitle
+        {
+            get { return "Testing animation performance on a large map with culling"; }
+        }
+    }
+
+
+    public class TMXSuperLargeMapTest : TileDemo
+    {
+        public TMXSuperLargeMapTest() : base("TileMaps/super_large_map")
+        {
+        }
+
+        public override string Title
+        {
+            get { return "Super large map : Testing culling"; }
+        }
+
+        public override string Subtitle
+        {
+            get { return "400x400 isometric"; }
+        }
+    }
+
+    public class TMXStaggeredMapTest : TileDemo
+    {
+        CCDrawNode drawNode;
+
+        public TMXStaggeredMapTest() : base("TileMaps/staggered_test")
+        {
+            drawNode = new CCDrawNode();
+            tileLayersContainer.AddChild(drawNode);
+
+            var touchListener = new CCEventListenerTouchOneByOne();
+            touchListener.OnTouchBegan = OnTouchBegan;
+
+            AddEventListener(touchListener);
+        }
+
+        public override string Title
+        {
+            get { return "Staggered isometric tile map"; }
+        }
+
+        bool OnTouchBegan(CCTouch touch, CCEvent touchEvent)
+        {
+            var layer = tileMap.LayerNamed("grass");
+
+            var location = layer.WorldToParentspace(touch.Location);
+            var tileCoordinates = layer.ClosestTileCoordAtNodePosition(location);
+
+            if(tileCoordinates.Row < 0 || tileCoordinates.Column < 0)
+                return true;
+
+            // Convert the tile coordinates position to world coordinates for
+            // our outline drawing
+            var world = layer.TilePosition(tileCoordinates);
+
+
+            // Calculate our width and height of the tile
+            CCSize texToContentScaling = CCTileMapLayer.DefaultTexelToContentSizeRatios;
+            float width = layer.TileTexelSize.Width * texToContentScaling.Width;
+            float height = layer.TileTexelSize.Height * texToContentScaling.Height;
+
+            var rect = new CCRect(world.X, world.Y, width, height);
+
+            drawNode.Clear();
+
+            drawNode.Color = CCColor3B.Magenta;
+            drawNode.Opacity = 255;
+
+            var center = rect.Center;
+
+            var right = center;
+            right.X += width / 2;
+
+            var top = center;
+            top.Y += height / 2;
+
+            var left = right;
+            left.X -= width;
+
+            var bottom = center;
+            bottom.Y -= height / 2;
+
+            // Hightlight our iso tile
+            drawNode.DrawPolygon (new CCPoint[] {right, top, left, bottom}, 4, CCColor4B.Transparent, 1, new CCColor4F(CCColor4B.Magenta));
+
+            return true;
+        }
+    }
+
+    public class TMXPolylineTest : TileDemo
+    {
+        public TMXPolylineTest() : base("TileMaps/orthogonal-test-polylines")
+        {
+			// Polylines render purple
+			// Polygons render yellow
+			// Rectangles render green
+			// Ellipses render blue
+
+			var mainLayer = tileMap.LayerNamed( "Layer 0" );
+			var boundsObject = tileMap.ObjectGroupNamed( "Object Layer 1" );
+
+	        var draw = new CCDrawNode();
+	        mainLayer.AddChild(draw);
+
+			foreach ( var bound in boundsObject.Objects )
+			{
+				// There is no indication in a TMX file that a given object is a rectangle.
+				// This is just the default way an object is interpreted by Tiled. 
+				// So if the map loader didn't add a "shape" key, interpret it as a rectangle.
+				if ( !bound.ContainsKey( "shape" ) )
+				{
+					DrawRectangle(bound, draw);
+					continue;
+				}
+
+				string shape = bound["shape"];
+				switch ( shape )
+				{
+					case "polyline":
+						DrawPolyline( bound, draw );
+						break;
+
+					case "polygon":
+						DrawPolygon( bound, draw );
+						break;
+
+                    case "ellipse":
+                        DrawEllipse (bound, draw);
+						break;
+				}
+			}
+        }
+
+		#region Parsing
+
+		protected void DrawRectangle(Dictionary<string, string> dict, CCDrawNode draw)
+		{
+			float x = float.Parse( dict["x"] );
+			float y = float.Parse( dict["y"] );
+			float width = float.Parse( dict["width"] );
+			float height = float.Parse( dict["height"] );
+			draw.DrawRect(new CCRect(x, y, width, height), new CCColor4B(0, 0, 0, 0), 1.0f, new CCColor4B(0, 255, 0));
+		}
+
+		protected void DrawPolygon(Dictionary<string, string> dict, CCDrawNode draw)
+		{
+			List<CCPoint> points = ParsePoints(dict["points"]);
+			draw.DrawPolygon(points.ToArray(), points.Count, new CCColor4B(0, 0, 0, 0), 1.0f, new CCColor4B(255, 255, 0) );
+		}
+
+		public void DrawPolyline(Dictionary<string, string> dict, CCDrawNode draw)
+		{
+			List<CCPoint> points = ParsePoints(dict["points"]);
+			var color = new CCColor4B( 255, 0, 255 );
+			for ( int i = 0; i < points.Count-1; i++ )
+			{
+				draw.AddLineVertex(new CCV3F_C4B(points[i], color));
+				draw.AddLineVertex(new CCV3F_C4B(points[i+1], color));
+			}
+		}
+
+        public void DrawEllipse(Dictionary<string, string> dict, CCDrawNode draw)
+        {
+
+            float x = float.Parse( dict["x"] );
+            float y = float.Parse( dict["y"] );
+            float width = float.Parse( dict["width"] );
+            float height = float.Parse( dict["height"] );
+            draw.DrawEllipse (new CCRect (x, y, width, height), 1, new CCColor4B (0, 0, 255, 255));
+        }
+
+		protected List<CCPoint> ParsePoints(string pointsString)
+		{
+			var list = new List<CCPoint>();
+			string[] pointPairs = pointsString.Split(' ');
+			foreach (string pointPair in pointPairs)
+			{
+				string[] pointCoords = pointPair.Split(',');
+				if (pointCoords.Length != 2)
+					return null;
+
+				float x = float.Parse(pointCoords[0]);
+				float y = float.Parse(pointCoords[1]);
+
+				list.Add( new CCPoint(x, y) );
+			}
+			return list;
+		}
+
+		#endregion
+
+
+		public override string Title
+		{
+			get { return "TMX Polyline test"; }
+		}
+    }
+
+
+    public class TMXMultiLayerTest : TileDemo
+    {
+        public TMXMultiLayerTest() : base("TileMaps/orthogonal-test-multilayer")
+        {
+			// Background layer should display red circles
+        }
+
+		public override string Title
+		{
+			get { return "TMX Multilayer test"; }
+		}
+    }
+
+    public class TMXLayerWithMutiTilesets:TileDemo
+    {
+        public TMXLayerWithMutiTilesets()
+            : base("TileMaps/desert-palace-multi-tileset")
+        {
+			// Background layer should display red circles
+        }
+
+		public override string Title
+		{
+			get { return "TMX Multiple Tilesets per layer"; }
+		}
+        public override string Subtitle
+        {
+            get { return "Using multiple tilesets in the one CCTileMapLayer with animations"; }
+        }
+    }
+
+
+    public class TMXLayerRepositionTileLayer : TileDemo
+    {
+        public TMXLayerRepositionTileLayer()
+            : base("TileMaps/iso-test-vertexz")
+        {
+        }
+
+        public override string Title
+        {
+            get { return "Non-zero position of tilemap layer"; }
+        }
+        public override string Subtitle
+        {
+            get { return "Testing culling when tilemap layer position is non-zero"; }
+        }
+
+        public override void OnEnter()
+        {
+            base.OnEnter(); 
+
+            CCSize s = tileLayersContainer.ContentSize;
+            CCTileMapLayer layer = tileMap.LayerNamed("Trees");
+
+            CCMoveBy move = new CCMoveBy (5, new CCPoint(500, 550));
+            CCMoveBy move2 = new CCMoveBy (5, new CCPoint(250, 250));
+            CCFiniteTimeAction back = move.Reverse();
+            CCSequence seq = new CCSequence(move, back);
+
+            tileMap.Camera.NearAndFarOrthographicZClipping 
+              = new CCNearAndFarClipping(-2000f, 2000f);
+
+            layer.RunAction(seq);
+            tileLayersContainer.RunAction(new CCSequence(move2.Reverse(), move2));
+        }
     }
 }

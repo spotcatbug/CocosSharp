@@ -9,14 +9,9 @@ namespace CocosSharp
     /// </summary>
     public abstract class CCGridBase 
     {
-        bool active;
         bool textureFlipped;
-
         CCPoint step;
-        CCSize contentSize;
-
         CCScene scene;
-
 
         #region Properties
 
@@ -77,19 +72,6 @@ namespace CocosSharp
                 }
             }
         }
-//
-//        public CCSize ContentSize
-//        {
-//            get { return contentSize; }
-//            set 
-//            {
-//                if (contentSize != value) 
-//                {
-//                    contentSize = value;
-//                    Step = new CCPoint (contentSize.Width / GridSize.X, contentSize.Height / GridSize.Y);
-//                }
-//            }
-//        }
 
         #endregion Properties
 
@@ -107,15 +89,41 @@ namespace CocosSharp
 
         #endregion Constructors
 
+        #region Cleaning up
+
+        ~CCGridBase ()
+        {
+            this.Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if(disposing) 
+            {
+                // Dispose of managed resources
+                Texture.Dispose();
+                Grabber = null;
+            }
+
+
+        }
+        #endregion
+
+
         public abstract void Reuse();
         public abstract void CalculateVertexPoints();
 
         public virtual void Blit()
         {
             CCDrawManager drawManager = Scene.Window.DrawManager;
-            drawManager.Viewport = Scene.Viewport.XnaViewport;
-            drawManager.ViewMatrix = Layer.Camera.ViewMatrix;
-            drawManager.ProjectionMatrix = Layer.Camera.ProjectionMatrix;
+            drawManager.BindTexture(Texture);
         }
 
         public virtual void BeforeDraw()
@@ -126,8 +134,6 @@ namespace CocosSharp
         public virtual void AfterDraw(CCNode target)
         {
             Grabber.AfterRender(Texture);
-
-            Scene.Window.DrawManager.BindTexture(Texture);
         }
 
         public ulong NextPOT(ulong x)

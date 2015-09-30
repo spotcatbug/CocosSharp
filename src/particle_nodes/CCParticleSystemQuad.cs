@@ -8,78 +8,90 @@ namespace CocosSharp
     public class CCParticleSystemQuad : CCParticleSystem
     {
         // ivars
-        CCRawList<CCV3F_C4B_T2F_Quad> quads;
-        CCPoint currentPosition;
+        CCBlendFunc blendFunc;
+        CCTexture2D texture;
 
+        CCPoint currentPosition;
+        CCRawList<CCV3F_C4B_T2F_Quad> quads;
+        CCCustomCommand renderParticlesCommand;
 
         #region Properties
+
+        public bool BlendAdditive
+        {
+            get { return BlendFunc == CCBlendFunc.Additive; }
+            set
+            {
+                if (value)
+                {
+                    blendFunc = CCBlendFunc.Additive;
+                }
+                else
+                {
+                    if (Texture != null && !Texture.HasPremultipliedAlpha)
+                    {
+                        blendFunc = CCBlendFunc.NonPremultiplied;
+                    }
+                    else
+                    {
+                        blendFunc = CCBlendFunc.AlphaBlend;
+                    }
+                }
+            }
+        }
 
         public override int TotalParticles
         {
             set
             {
-                // If we are setting the total numer of particles to a number higher
-                // than what is allocated, we need to allocate new arrays
+                if(value == TotalParticles)
+                    return;
+
                 if (value > AllocatedParticles)
                 {
                     if (EmitterMode == CCEmitterMode.Gravity) 
-                    {
                         GravityParticles = new CCParticleGravity[value];
-
-                        if(BatchNode != null)
-                        {
-                            for (int i = 0; i < value; i++)
-                            {
-                                GravityParticles[i].AtlasIndex = i;
-                            }
-                        }
-                    } 
                     else 
-                    {
                         RadialParticles = new CCParticleRadial[value];
 
-                        if(BatchNode != null)
-                        {
-                            for (int i = 0; i < value; i++)
-                            {
-                                RadialParticles[i].AtlasIndex = i;
-                            }
-                        }
-                    }
-
-                    if (Quads == null) 
-                    {
-                        Quads = new CCRawList<CCV3F_C4B_T2F_Quad> (value); 
-                    } 
-                    else 
-                    {
-                        Quads.Capacity = value;
-                    }
+                    if(quads != null)
+                        quads.Capacity = value;
 
                     AllocatedParticles = value;
-                    base.TotalParticles = value;
                 }
-                else
+
+                base.TotalParticles = value;
+            }
+        }
+
+        public CCBlendFunc BlendFunc
+        {
+            get { return blendFunc; }
+            set
+            {
+                if (blendFunc.Source != value.Source || blendFunc.Destination != value.Destination)
                 {
-                    base.TotalParticles = value;
+                    blendFunc = value;
+                    UpdateBlendFunc();
                 }
             }
         }
 
-        public override CCTexture2D Texture
+        public CCTexture2D Texture
         {
+            get { return texture; }
             set
             {
                 if (value == null)
                     return;
 
                 // Only update the texture if is different from the current one
-                if (Texture == null || value.Name != Texture.Name)
+                if (value != Texture)
                 {
-                    base.Texture = value;
-
+                    texture = value;
                     CCSize s = value.ContentSizeInPixels;
                     TextureRect = new CCRect (0, 0, s.Width, s.Height);
+                    UpdateBlendFunc();
                 }
             }
         }
@@ -89,46 +101,13 @@ namespace CocosSharp
             set { ResetTexCoords(value); }
         }
 
-        public override CCParticleBatchNode BatchNode
-        {
-            set
-            {
-                if (BatchNode != value)
-                {
-                    CCParticleBatchNode oldBatch = BatchNode;
-
-                    base.BatchNode = value;
-
-                    if (value == null)
-                    {
-                        Debug.Assert (BatchNode == null, "Memory should not be alloced when not using batchNode");
-                        Debug.Assert ((quads == null), "Memory already alloced");
-
-                        Quads = new CCRawList<CCV3F_C4B_T2F_Quad> (TotalParticles);
-                        Texture = oldBatch.Texture;
-                    }
-
-                    else if (oldBatch == null)
-                    {
-                        var batchQuads = BatchNode.TextureAtlas.Quads.Elements;
-                        BatchNode.TextureAtlas.Dirty = true;
-                        Array.Copy(quads.Elements, 0, batchQuads, AtlasIndex, TotalParticles);
-                        Quads = null;
-                    }
-                }
-            }
-        }
-
         CCRawList<CCV3F_C4B_T2F_Quad> Quads
         {
-            get { return quads; }
             set 
             {
-                CCRawList<CCV3F_C4B_T2F_Quad> oldQuads = quads;
-                quads = value;
-
-                if (Texture!= null && quads != null && quads != oldQuads && Window != null) 
+                if (Texture!= null && value != null && value != quads && Window != null) 
                 {
+                    quads = value;
                     CCSize texSize = Texture.ContentSizeInPixels;
 
                     // Load the quads with tex coords
@@ -142,35 +121,55 @@ namespace CocosSharp
 
         #region Constructors
 
-        internal CCParticleSystemQuad()
-        {  
-        }
-
-        public CCParticleSystemQuad(int numberOfParticles, CCEmitterMode emitterMode=CCEmitterMode.Gravity) 
+        public CCParticleSystemQuad(int numberOfParticles = 0, CCEmitterMode emitterMode=CCEmitterMode.Gravity) 
             : base(numberOfParticles, emitterMode)
         {
+            InitRenderCommand();
         }
 
-        public CCParticleSystemQuad(CCParticleSystemConfig config) : base(config)
-        {}
-
-        public CCParticleSystemQuad(string plistFile, string directoryName = null) : base(plistFile, directoryName)
+        public CCParticleSystemQuad(CCParticleSystemConfig config) 
+            : base(config)
         {
-            int totalPart = TotalParticles;
+            InitRenderCommand();
+
+            Texture = config.Texture;
+
+            CCBlendFunc blendFunc = new CCBlendFunc();
+            blendFunc.Source = config.BlendFunc.Source;
+            blendFunc.Destination = config.BlendFunc.Destination;
+            BlendFunc = blendFunc;
+        }
+
+        public CCParticleSystemQuad (string plistFile, string directoryName = null)
+            : this (new CCParticleSystemConfig (plistFile, directoryName))
+        { }
+
+        void InitRenderCommand()
+        {
+            quads = new CCRawList<CCV3F_C4B_T2F_Quad> (TotalParticles);
+            renderParticlesCommand = new CCCustomCommand(RenderParticles);
         }
 
         #endregion Constructors
 
 
-        protected override void Draw()
+        protected override void VisitRenderer(ref CCAffineTransform worldTransform)
         {
-            Debug.Assert(BatchNode == null, "draw should not be called when added to a particleBatchNode");
+            if(ParticleCount == 0)
+                return;
 
-            Window.DrawManager.BindTexture(Texture);
-            Window.DrawManager.BlendFunc(BlendFunc);
-            Window.DrawManager.DrawQuads(quads, 0, ParticleCount);
+            renderParticlesCommand.GlobalDepth = worldTransform.Tz;
+            renderParticlesCommand.WorldTransform = worldTransform;
+
+            Renderer.AddCommand(renderParticlesCommand);
         }
 
+        void RenderParticles()
+        {
+            DrawManager.BlendFunc(BlendFunc);
+            DrawManager.BindTexture(Texture);
+            DrawManager.DrawQuads(quads, 0, ParticleCount);
+        }
 
         #region Updating quads
 
@@ -207,19 +206,10 @@ namespace CocosSharp
 
             CCV3F_C4B_T2F_Quad[] rawQuads;
             int start, end;
-            if (BatchNode != null)
-            {
-                rawQuads = BatchNode.TextureAtlas.Quads.Elements;
-                BatchNode.TextureAtlas.Dirty = true;
-                start = AtlasIndex;
-                end = AtlasIndex + TotalParticles;
-            }
-            else
-            {
-                rawQuads = Quads.Elements;
-                start = 0;
-                end = TotalParticles;
-            }
+
+            rawQuads = quads.Elements;
+            start = 0;
+            end = TotalParticles;
 
             for (int i = start; i < end; i++)
             {
@@ -246,14 +236,6 @@ namespace CocosSharp
             else
             {
                 newPosition = particle.Position;
-            }
-
-            // translate newPos to correct position, since matrix transform isn't performed in batchnode
-            // don't update the particle with the new position information, it will interfere with the radius and tangential calculations
-            if(BatchNode != null)
-            {
-                newPosition.X += Position.X;
-                newPosition.Y += Position.Y;
             }
 
             CCColor4B color = new CCColor4B();
@@ -357,16 +339,7 @@ namespace CocosSharp
                 currentPosition = Position;
             }
 
-            CCV3F_C4B_T2F_Quad[] rawQuads;
-            if (BatchNode != null)
-            {
-                rawQuads = BatchNode.TextureAtlas.Quads.Elements;
-                BatchNode.TextureAtlas.Dirty = true;
-            }
-            else
-            {
-                rawQuads = Quads.Elements;
-            }
+            CCV3F_C4B_T2F_Quad[] rawQuads = quads.Elements;
 
             if (EmitterMode == CCEmitterMode.Gravity) 
             {
@@ -381,38 +354,20 @@ namespace CocosSharp
         void UpdateGravityParticleQuads(CCV3F_C4B_T2F_Quad[] rawQuads)
         {
             var count = ParticleCount;
-            if (BatchNode != null)
+
+            for (int i = 0; i < count; i++)
             {
-                for (int i = 0; i < count; i++)
-                {
-                    UpdateQuad(ref rawQuads[AtlasIndex + GravityParticles[i].AtlasIndex], ref GravityParticles[i].ParticleBase);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    UpdateQuad(ref rawQuads[i], ref GravityParticles[i].ParticleBase);
-                }
+                UpdateQuad(ref rawQuads[i], ref GravityParticles[i].ParticleBase);
             }
         }
 
         void UpdateRadialParticleQuads(CCV3F_C4B_T2F_Quad[] rawQuads)
         {
             var count = ParticleCount;
-            if (BatchNode != null)
+
+            for (int i = 0; i < count; i++)
             {
-                for (int i = 0; i < count; i++)
-                {
-                    UpdateQuad(ref rawQuads[AtlasIndex + RadialParticles[i].AtlasIndex], ref RadialParticles[i].ParticleBase);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    UpdateQuad(ref rawQuads[i], ref RadialParticles[i].ParticleBase);
-                }
+                UpdateQuad(ref rawQuads[i], ref RadialParticles[i].ParticleBase);
             }
         }
 
@@ -471,6 +426,25 @@ namespace CocosSharp
             p.AutoRemoveOnFinish = AutoRemoveOnFinish;
 
             return p;
+        }
+
+
+        void UpdateBlendFunc()
+        {
+            if (Texture != null)
+            {
+                bool premultiplied = Texture.HasPremultipliedAlpha;
+
+                OpacityModifyRGB = false;
+
+                if (blendFunc == CCBlendFunc.AlphaBlend)
+                {
+                    if (premultiplied)
+                        OpacityModifyRGB = true;
+                    else
+                        blendFunc = CCBlendFunc.NonPremultiplied;
+                }
+            }
         }
 
     }

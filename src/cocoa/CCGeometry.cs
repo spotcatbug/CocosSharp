@@ -90,6 +90,11 @@ namespace CocosSharp
 			}
 		}
 
+        internal Vector3 XnaVector
+        {
+            get { return new Vector3 (X, Y, 0.0f); }
+        }
+
 		#endregion Properties
 
 
@@ -287,7 +292,7 @@ namespace CocosSharp
         /** Rotates a point counter clockwise by the angle around a pivot
             @param v is the point to rotate
             @param pivot is the pivot, naturally
-            @param angle is the angle of rotation cw in radians
+            @param angle is the angle of rotation ccw in radians
             @returns the rotated point
             @since v0.99.1
         */
@@ -733,6 +738,14 @@ namespace CocosSharp
         {
         }
 
+        internal CCPoint3(Vector3 xnaVec) : this(xnaVec.X, xnaVec.Y, xnaVec.Z)
+        {
+        }
+
+        public override string ToString()
+        {
+            return String.Format("CCPoint3 : (x={0}, y={1}, z={2})", X, Y, Z);
+        }
         #region Operators
 
         public static bool operator ==(CCPoint3 p1, CCPoint3 p2)
@@ -1060,7 +1073,26 @@ namespace CocosSharp
 
 		#endregion Equality
 
+        public CCRect IntegerRoundedUpRect()
+        {
+            CCRect roundedUpRect = this;
+
+            roundedUpRect.Size.Width = (float)(Math.Ceiling(roundedUpRect.Origin.X + roundedUpRect.Size.Width) 
+                - Math.Floor(roundedUpRect.Origin.X));
+            roundedUpRect.Size.Height = (float)(Math.Ceiling(roundedUpRect.Origin.Y + roundedUpRect.Size.Height) 
+                - Math.Floor(roundedUpRect.Origin.Y));
+            roundedUpRect.Origin.X = (float)Math.Floor(roundedUpRect.Origin.X);
+            roundedUpRect.Origin.Y = (float)Math.Floor(roundedUpRect.Origin.Y);
+
+            return roundedUpRect;
+        }
+
         public CCRect Intersection(CCRect rect)
+        {
+            return Intersection(ref rect);
+        }
+
+        public CCRect Intersection(ref CCRect rect)
         {
             if (!IntersectsRect(rect))
             {
@@ -1089,11 +1121,11 @@ namespace CocosSharp
             {
                 minx = rect.MinX;
             }
-            if (rect.MaxX < MaxX)
+            if (rect.MaxX <= MaxX)
             {
                 maxx = rect.MaxX;
             }
-            else if (rect.MaxX > MaxX)
+            else
             {
                 maxx = MaxX;
             }
@@ -1106,11 +1138,11 @@ namespace CocosSharp
             {
                 miny = rect.MinY;
             }
-            if (rect.MaxY < MaxY)
+            if (rect.MaxY <= MaxY)
             {
                 maxy = rect.MaxY;
             }
-            else if (rect.MaxY > MaxY)
+            else
             {
                 maxy = MaxY;
             }
@@ -1119,7 +1151,7 @@ namespace CocosSharp
 
         public bool IntersectsRect(CCRect rect)
         {
-            return !(MaxX < rect.MinX || rect.MaxX < MinX || MaxY < rect.MinY || rect.MaxY < MinY);
+            return IntersectsRect(ref rect);
         }
 
         public bool IntersectsRect(ref CCRect rect)
@@ -1568,7 +1600,7 @@ namespace CocosSharp
         /// Calculates perpendicular of v, rotated 90 degrees counter-clockwise -- cross(v, PerpendicularCCW(v)) >= 0
         /// </summary>
         /// <returns>A perpendicular vector to source vector</returns>
-        /// <param name="p">Source point.</param>
+        /// <param name="v">Source point.</param>
         public static CCVector2 PerpendicularCCW(CCVector2 v)
         {
             CCVector2 vector;
@@ -1577,11 +1609,12 @@ namespace CocosSharp
             return vector;
         }
 
+
         /// <summary>
-        /// Calculates perpendicular of v, rotated 90 degrees clockwise -- cross(v, PerpendicularCW(v)) <= 0
+        /// Calculates perpendicular of v, rotated 90 degrees clockwise -- cross(v, PerpendicularCW(v)) less than or equal to 0
         /// </summary>
         /// <returns>A perpendicular vector to source vector</returns>
-        /// <param name="p">Source vector.</param>
+        /// <param name="v">Source vector.</param>
         public static CCVector2 PerpendicularCW(CCVector2 v)
         {
             CCVector2 vector;

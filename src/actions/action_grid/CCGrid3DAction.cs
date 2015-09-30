@@ -1,5 +1,5 @@
+using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
 
 namespace CocosSharp
 {
@@ -26,7 +26,7 @@ namespace CocosSharp
 
         protected internal override CCActionState StartAction(CCNode target)
         {
-            return new CCGrid3DActionState (this, target);
+            return new CCGrid3DActionState (this, GridNode(target));
         }
     }
 
@@ -35,7 +35,6 @@ namespace CocosSharp
 
     public class CCGrid3DActionState : CCGridActionState
     {
-        CCRenderTexture gridRenderTexture;
         CCTexture2D gridTexture;
         CCGrid3D grid3D;
         CCSize gridTextureSizeInPixels;
@@ -46,7 +45,6 @@ namespace CocosSharp
             {
                 if (Target != null && Target.Scene.DesignResolutionSize != CCSize.Zero)
                 {
-                    var texelToContentSizeRatios = CCSize.One;
                     gridTextureSizeInPixels = Target.Scene.DesignResolutionSize;
                 }
                 else
@@ -75,10 +73,9 @@ namespace CocosSharp
             }
         }
 
-        public CCGrid3DActionState (CCGrid3DAction action, CCNode target) : base (action, target)
+        public CCGrid3DActionState (CCGrid3DAction action, CCNodeGrid target) : base (action, target)
         {
         }
-
 
         #region Grid Vertex manipulation
 

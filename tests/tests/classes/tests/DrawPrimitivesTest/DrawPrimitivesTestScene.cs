@@ -9,7 +9,12 @@ namespace tests
     public class DrawPrimitivesTestScene : TestScene
     {
         private static int sceneIdx = -1;
-        private static int MAX_LAYER = 4;
+        private static int MAX_LAYER = 9;
+
+        public DrawPrimitivesTestScene () : base()
+        {
+            MAX_LAYER = createPrimitiveLayerFunctions.Length;
+        }
 
         public override void runThisTest()
         {
@@ -18,22 +23,29 @@ namespace tests
             Scene.Director.ReplaceScene(this);
         }
 
-        public static CCLayer createTestLayer(int nIndex)
+        public static CCLayer createTestLayer(int index)
         {
-            switch (nIndex)
-            {
-                case 0:
-                    return new DrawPrimitivesTest();
-                case 1:
-                    return new DrawNodeTest();
-                case 2:
-                    return new DrawNodeTest1();
-                case 3:
-                    return new DrawPrimitivesWithRenderTextureTest();
-            }
-            return null;
+            return createPrimitiveLayerFunctions[index]();
         }
 
+        static Func<CCLayer>[] createPrimitiveLayerFunctions =
+            {
+                () => new DrawPrimitivesTest(),
+                () => new DrawNodeTest(),
+                () => new DrawNodeTest1(),
+                () => new DrawNodeTestBlend(),
+                () => new DrawNodeTriangleVertex(),
+                () => new DrawNodeDrawPolygon(),
+
+                () => new DrawNodeWithRenderTextureTest(),
+                () => new DrawNodeWithRenderTextureTest1(),
+                () => new DrawNodeWithRenderTextureTest2(),
+                () => new DrawNodeWithRenderTextureTest3(),
+                () => new GeometryBatchTest1 (),
+                () => new GeometryBatchTest2(),
+
+            };
+        
         protected override void NextTestCase()
         {
             nextTestAction();

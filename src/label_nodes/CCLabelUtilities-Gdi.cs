@@ -13,66 +13,6 @@ namespace CocosSharp
         private static Graphics _graphics;
         private static Brush _brush;
 
-        internal static CCTexture2D CreateNativeLabel(string text, CCSize dimensions, CCTextAlignment hAlignment,
-		                                   CCVerticalTextAlignment vAlignment, string fontName,
-		                                   float fontSize, CCColor4B textColor)
-		{
-
-		    if (string.IsNullOrEmpty(text))
-		    {
-		        return new CCTexture2D();
-		    }
-
-		    var font = CreateFont (fontName, fontSize);
-
-            if (dimensions.Equals(CCSize.Zero))
-            {
-                CreateBitmap(1, 1);
-
-                var ms = _graphics.MeasureString(text, font);
-                
-                dimensions.Width = ms.Width;
-                dimensions.Height = ms.Height;
-            }
-
-            CreateBitmap((int)dimensions.Width, (int)dimensions.Height);
-
-            var stringFormat = new StringFormat();
-
-		    switch (hAlignment)
-		    {
-		        case CCTextAlignment.Left:
-                    stringFormat.Alignment = StringAlignment.Near;
-		            break;
-		        case CCTextAlignment.Center:
-                    stringFormat.Alignment = StringAlignment.Center;
-		            break;
-		        case CCTextAlignment.Right:
-                    stringFormat.Alignment = StringAlignment.Far;
-		            break;
-		    }
-
-		    switch (vAlignment)
-		    {
-		        case CCVerticalTextAlignment.Top:
-        		    stringFormat.LineAlignment = StringAlignment.Near;
-		            break;
-		        case CCVerticalTextAlignment.Center:
-        		    stringFormat.LineAlignment = StringAlignment.Center;
-		            break;
-		        case CCVerticalTextAlignment.Bottom:
-        		    stringFormat.LineAlignment = StringAlignment.Far;
-		            break;
-		    }
-
-            _graphics.DrawString(text, font, _brush, new RectangleF(0, 0, dimensions.Width, dimensions.Height), stringFormat);
-            _graphics.Flush();
-
-            var texture = new CCTexture2D(SaveToStream(), CCSurfaceFormat.Bgra4444);
-
-			return texture;
-		}
-
         static void CreateBitmap(int width, int height)
         {
             if (_brush == null)
@@ -114,5 +54,48 @@ namespace CocosSharp
             return stream;
 		}
 
+        // RGB to BGR convert Matrix
+        private static float[][] rgbtobgr = new float[][]
+	      {
+		     new float[] {0, 0, 1, 0, 0},
+		     new float[] {0, 1, 0, 0, 0},
+		     new float[] {1, 0, 0, 0, 0},
+		     new float[] {0, 0, 0, 1, 0},
+		     new float[] {0, 0, 0, 0, 1}
+	      };
+
+        internal static Image RGBToBGR(this Image bmp)
+        {
+            Image newBmp;
+            if ((bmp.PixelFormat & PixelFormat.Indexed) != 0)
+            {
+                newBmp = new Bitmap(bmp.Width, bmp.Height, PixelFormat.Format32bppArgb);
+            }
+            else
+            {
+                newBmp = bmp;
+            }
+
+            try
+            {
+                System.Drawing.Imaging.ImageAttributes ia = new System.Drawing.Imaging.ImageAttributes();
+                System.Drawing.Imaging.ColorMatrix cm = new System.Drawing.Imaging.ColorMatrix(rgbtobgr);
+
+                ia.SetColorMatrix(cm);
+                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newBmp))
+                {
+                    g.DrawImage(bmp, new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), 0, 0, bmp.Width, bmp.Height, System.Drawing.GraphicsUnit.Pixel, ia);
+                }
+            }
+            finally
+            {
+                if (newBmp != bmp)
+                {
+                    bmp.Dispose();
+                }
+            }
+
+            return newBmp;
+        }
     }
 }

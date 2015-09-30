@@ -39,17 +39,13 @@ namespace CocosSharp
     }
 
 
-    public class CCParticleSystem : CCNode, ICCTexture
+    public abstract class CCParticleSystem : CCNode
     {
         public const int ParticleDurationInfinity = -1;           
         public const int ParticleStartSizeEqualToEndSize = -1;   
         public const int ParticleStartRadiusEqualToEndRadius = -1;
 
         // ivars
-        int totalParticles;
-        CCParticleBatchNode batchNode;
-        CCTexture2D texture;
-        CCBlendFunc blendFunc = CCBlendFunc.AlphaBlend;
         GravityMoveMode gravityMode;
         RadialMoveMode radialMode;
 
@@ -125,6 +121,7 @@ namespace CocosSharp
         public bool AutoRemoveOnFinish { get; set; }
         public bool OpacityModifyRGB { get; set; }
 
+        public virtual int TotalParticles { get; set; }
         protected int AllocatedParticles { get; set; }
         public int ParticleCount { get; private set; }
         public int AtlasIndex { get; set; }
@@ -164,101 +161,7 @@ namespace CocosSharp
 
         public bool IsFull
         {
-            get { return (ParticleCount == totalParticles); }
-        }
-
-        public virtual int TotalParticles
-        {
-            get { return totalParticles; }
-            set
-            {
-                Debug.Assert(value <= AllocatedParticles, "Particle: resizing particle array only supported for quads");
-                totalParticles = value;
-            }
-        }
-
-        public CCBlendFunc BlendFunc
-        {
-            get { return blendFunc; }
-            set
-            {
-                if (blendFunc.Source != value.Source || blendFunc.Destination != value.Destination)
-                {
-                    blendFunc = value;
-                    UpdateBlendFunc();
-                }
-            }
-        }
-
-        public bool BlendAdditive
-        {
-            get { return blendFunc == CCBlendFunc.Additive; }
-            set
-            {
-                if (value)
-                {
-                    blendFunc = CCBlendFunc.Additive;
-                }
-                else
-                {
-                    if (Texture != null && !Texture.HasPremultipliedAlpha)
-                    {
-                        blendFunc = CCBlendFunc.NonPremultiplied;
-                    }
-                    else
-                    {
-                        blendFunc = CCBlendFunc.AlphaBlend;
-                    }
-                }
-            }
-        }
-
-        public virtual CCParticleBatchNode BatchNode
-        {
-            get { return batchNode; }
-            set
-            {
-                if (batchNode != value)
-                {
-                    batchNode = value;
-
-                    if (value != null)
-                    {
-                        if (EmitterMode == CCEmitterMode.Gravity) 
-                        {
-                            // each particle needs a unique index
-                            for (int i = 0; i < totalParticles; i++) 
-                            {
-                                GravityParticles[i].AtlasIndex = i;
-                            }
-                        } 
-                        else 
-                        {
-                            // each particle needs a unique index
-                            for (int i = 0; i < totalParticles; i++) 
-                            {
-                                RadialParticles[i].AtlasIndex = i;
-                            }
-                        }
-
-                        if(Layer != null && BatchNode.Layer != Layer)
-                            BatchNode.Layer = Layer;
-                    }
-                }
-            }
-        }
-
-        public virtual CCTexture2D Texture
-        {
-            get { return texture; }
-            set
-            {
-                if (Texture != value)
-                {
-                    texture = value;
-                    UpdateBlendFunc();
-                }
-            }
+            get { return (ParticleCount == TotalParticles); }
         }
 
         protected GravityMoveMode GravityMode 
@@ -370,42 +273,10 @@ namespace CocosSharp
             set { radialMode.RotatePerSecondVar = value; }
         }
 
-        public override CCScene Scene 
-        { 
-            get { return base.Scene; }
-            internal set 
-            {
-                if(Scene != null && BatchNode != null && BatchNode.Scene != Scene)
-                {
-                    BatchNode.Scene = Scene;
-                }
-
-                base.Scene = value;
-            }
-        }
-
-        public override CCLayer Layer 
-        { 
-            get { return base.Layer; }
-            internal set 
-            {
-                if(Layer != null && BatchNode != null && BatchNode.Layer != Layer)
-                {
-                    BatchNode.Layer = Layer;
-                }
-
-                base.Layer = value;
-            }
-        }
-
         #endregion Properties
 
 
         #region Constructors
-
-        internal CCParticleSystem()
-        {  
-        }
 
         public CCParticleSystem(string plistFile, string directoryName = null) 
             : this(new CCParticleSystemConfig(plistFile, directoryName))
@@ -420,8 +291,6 @@ namespace CocosSharp
         {
             TotalParticles = numberOfParticles;
             AllocatedParticles = numberOfParticles;
-
-            BlendFunc = CCBlendFunc.AlphaBlend;
             PositionType = CCPositionType.Free;
             EmitterMode = emitterMode;
 
@@ -432,11 +301,11 @@ namespace CocosSharp
             {
                 if (emitterMode == CCEmitterMode.Gravity) 
                 {
-                    GravityParticles = new CCParticleGravity[TotalParticles];
+                    GravityParticles = new CCParticleGravity[numberOfParticles];
                 } 
                 else 
                 {
-                    RadialParticles = new CCParticleRadial[TotalParticles];
+                    RadialParticles = new CCParticleRadial[numberOfParticles];
                 }
             }
         }
@@ -450,11 +319,6 @@ namespace CocosSharp
 
             Angle = particleConfig.Angle;
             AngleVar = particleConfig.AngleVar;
-
-            CCBlendFunc blendFunc = new CCBlendFunc();
-            blendFunc.Source = particleConfig.BlendFunc.Source;
-            blendFunc.Destination = particleConfig.BlendFunc.Destination;
-            BlendFunc = blendFunc;
 
             CCColor4F startColor = new CCColor4F();
             startColor.R = particleConfig.StartColor.R;
@@ -547,10 +411,6 @@ namespace CocosSharp
                 Debug.Assert(false, "Invalid emitterType in config file");
                 return;
             }
-
-            // Don't get the internal texture if a batchNode is used
-            if (BatchNode == null)
-                Texture = particleConfig.Texture;
         }
 
         #endregion Constructors
@@ -841,10 +701,7 @@ namespace CocosSharp
 
             UpdateQuads();
 
-            if (BatchNode == null)
-            {
-                PostStep();
-            }
+            PostStep();
         }
 
         void UpdateGravityParticles(float dt)
@@ -892,15 +749,6 @@ namespace CocosSharp
                         if (index != ParticleCount - 1)
                         {
                             GravityParticles[index] = GravityParticles[ParticleCount - 1];
-                        }
-
-                        if (BatchNode != null)
-                        {
-                            //disable the switched particle
-                            BatchNode.DisableParticle(AtlasIndex + currentIndex);
-
-                            //switch indexes
-                            GravityParticles[ParticleCount - 1].AtlasIndex = currentIndex;
                         }
 
                         --ParticleCount;
@@ -963,15 +811,6 @@ namespace CocosSharp
                             RadialParticles[index] = RadialParticles[ParticleCount - 1];
                         }
 
-                        if (BatchNode != null)
-                        {
-                            //disable the switched particle
-                            BatchNode.DisableParticle(AtlasIndex + currentIndex);
-
-                            //switch indexes
-                            RadialParticles[ParticleCount - 1].AtlasIndex = currentIndex;
-                        }
-
                         --ParticleCount;
 
                         if (ParticleCount == 0 && AutoRemoveOnFinish)
@@ -980,30 +819,6 @@ namespace CocosSharp
                             Parent.RemoveChild(this, true);
                             return;
                         }
-                    }
-                }
-            }
-        }
-
-        void UpdateBlendFunc()
-        {
-            Debug.Assert(BatchNode == null, "Can't change blending functions when the particle is being batched");
-
-            if (Texture != null)
-            {
-                bool premultiplied = Texture.HasPremultipliedAlpha;
-
-                OpacityModifyRGB = false;
-
-                if (blendFunc == CCBlendFunc.AlphaBlend)
-                {
-                    if (premultiplied)
-                    {
-                        OpacityModifyRGB = true;
-                    }
-                    else
-                    {
-                        blendFunc = CCBlendFunc.NonPremultiplied;
                     }
                 }
             }

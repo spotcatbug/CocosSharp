@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -12,7 +12,6 @@
     <FileAlignment>512</FileAlignment>
     <AndroidApplication>true</AndroidApplication>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
-    <AndroidSupportedAbis>armeabi-v7a</AndroidSupportedAbis>
     <MandroidI18n />
     <AndroidLinkMode>None</AndroidLinkMode>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
@@ -23,7 +22,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\Android\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG;ANDROID</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -48,6 +47,7 @@
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -56,7 +56,6 @@
     <EmbeddedResource Include="grossini.mask" />
     <Compile Include="classes\AppDelegate.cs" />
     <Compile Include="classes\controller.cs" />
-    <Compile Include="classes\test.cs" />
     <Compile Include="classes\testBasic.cs" />
     <Compile Include="classes\testResource.cs" />
     <Compile Include="classes\TestNavigationLayer.cs" />
@@ -87,6 +86,7 @@
     <Compile Include="classes\tests\ClippingNodeTest\ClippingNodeTestScene.cs" />
     <Compile Include="classes\tests\CocosDenshionTest\CocosDenshionTest.cs" />
     <Compile Include="classes\tests\FontTest\SystemFontTest.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFSTextureView.cs" />
     <Compile Include="classes\tests\LabelTest\GitHubIssue5.cs" />
     <Compile Include="classes\tests\MultiTouchTest\MultiTouchTest.cs" />
     <Compile Include="classes\tests\NodeTest\CameraCenterTest.cs" />
@@ -257,6 +257,7 @@
     <Compile Include="classes\tests\ActionsProgressTest\SpriteProgressToRadialMidpointChanged.cs" />
     <Compile Include="classes\tests\ActionsProgressTest\SpriteProgressToVertical.cs" />
     <Compile Include="classes\tests\ActionsProgressTest\SpriteProgressWithSpriteFrame.cs" />
+    <Compile Include="classes\tests\RendererTest\RendererTestDemo.cs" />
     <Compile Include="classes\tests\RenderTextureTest\RenderTextureIssue937.cs" />
     <Compile Include="classes\tests\RenderTextureTest\RenderTextureCompositeTest.cs" />
     <Compile Include="classes\tests\RenderTextureTest\RenderTextureSave.cs" />
@@ -560,6 +561,41 @@
     <Compile Include="..\..\Extensions\GUI\CCScrollView\CCTableViewCell.cs">
       <Link>Extensions\GUI\CCScrollView\CCTableViewCell.cs</Link>
     </Compile>
+    <Compile Include="classes\tests\LabelTestNew\AtlasTestSceneNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTColorAndOpacity.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTMultiLine.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTMultiLineAlignment.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTOffset.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTPadding.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTSpriteActions.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelTestNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTandSFEmpty.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTBounds.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTColor.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTHundredLabels.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTUNICODELanguages.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFLongLineWrapping.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTRetina.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTGlyphDesigner.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelTTFAlignmentNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelTTFUnicodeChinese.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFAlignmentTest.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFColor.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontAlignmentTest.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontColor.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontUnicodeJapanese.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelTTFFontsTestNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTFlippedY.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTOldNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFOldNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTAdditionalKerningTest.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTContentSizeRatios.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTLineHeightTest.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFContentSizeRatios.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFont168.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontRenderTexture.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontColorAndOpacity.cs" />
+    <Compile Include="classes\tests\TextInputTest\CustomIME\Android\UppercaseIMEKeyboardImpl.cs" />
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="Assets\Content\animations\animations-2.plist.xnb">
@@ -2026,6 +2062,14 @@
     <AndroidAsset Include="Assets\Content\Images\ui.plist.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </AndroidAsset>
+    <AndroidAsset Include="Assets\Content\Images\animationbuttonnormal.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AndroidAsset>
+    <AndroidAsset Include="Assets\Content\Images\animationbuttonpressed.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AndroidAsset>
+    <AndroidAsset Include="Assets\Content\fonts\debugcompressed.xnb" />
+    <AndroidAsset Include="Assets\Content\fonts\debuguncompressed.xnb" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
     <None Include="Properties\AndroidManifest.xml" />
@@ -2042,6 +2086,44 @@
     <AndroidAsset Include="Assets\Content\hd\Images\CyanSquare.xnb" />
     <AndroidAsset Include="Assets\Content\hd\Images\MagentaSquare.xnb" />
     <AndroidAsset Include="Assets\Content\hd\Images\YellowSquare.xnb" />
+    <AndroidAsset Include="..\testsContent\TileMaps\iso-test-zorder1.tmx">
+      <Link>Assets\Content\TileMaps\iso-test-zorder1.tmx</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="Assets\Content\TileMaps\tilemap_no_encoding.xnb" />
+    <AndroidAsset Include="Assets\Content\TileMaps\fixed-ortho-bgtiles.xnb" />
+    <AndroidAsset Include="Assets\Content\TileMaps\orthogonal-test-multilayer.xnb" />
+    <AndroidAsset Include="Assets\Content\TileMaps\orthogonal-test-polylines.xnb" />
+    <AndroidAsset Include="Assets\Content\TileMaps\staggered_test.xnb" />
+    <AndroidAsset Include="Assets\Content\TileMaps\large_map.xnb" />
+    <AndroidAsset Include="..\testsContent\fonts\arial-26-en-ru_0.png">
+      <Link>Assets\Content\fonts\arial-26-en-ru_0.png</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\testsContent\fonts\arial-26-en-ru.fnt">
+      <Link>Assets\Content\fonts\arial-26-en-ru.fnt</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\testsContent\fonts\boundsTestFont.fnt">
+      <Link>Assets\Content\fonts\boundsTestFont.fnt</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="Assets\Content\TileMaps\super_large_map.xnb" />
+    <AndroidAsset Include="..\testsContent\fonts\boundsTestFont_0.png">
+      <Link>Assets\Content\fonts\boundsTestFont_0.png</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\testsContent\fonts\HKYuanMini.ttf">
+      <Link>Assets\Content\fonts\HKYuanMini.ttf</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\testsContent\fonts\Schwarzwald.ttf">
+      <Link>Assets\Content\fonts\Schwarzwald.ttf</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\testsContent\fonts\MorrisRoman-Black.ttf">
+      <Link>Assets\Content\fonts\MorrisRoman-Black.ttf</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="Assets\Content\TileMaps\animation_diff_tile_dim.xnb" />
+    <AndroidAsset Include="Assets\Content\TileMaps\animation_large_map.xnb" />
+    <AndroidAsset Include="Assets\Content\TileMaps\desert-palace-tiles.xnb" />
+    <AndroidAsset Include="Assets\Content\TileMaps\desert-palace.xnb" />
+    <AndroidAsset Include="Assets\Content\TileMaps\lamp-16x16.xnb" />
+    <AndroidAsset Include="Assets\Content\TileMaps\desert-palace-multi-tileset.xnb" />
+    <AndroidAsset Include="Assets\Content\TileMaps\people.xnb" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\Layout\Main.axml" />
@@ -2093,8 +2175,9 @@
   </Target>
   -->
   <ItemGroup />
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="classes\tests\EventDispatcherTest\" />
-    <Folder Include="Extensions\" />
+    <Folder Include="classes\tests\TextInputTest\CustomIME\" />
+    <Folder Include="classes\tests\TextInputTest\CustomIME\Android\" />
   </ItemGroup>
 </Project>

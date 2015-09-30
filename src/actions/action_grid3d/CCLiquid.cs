@@ -20,7 +20,7 @@ namespace CocosSharp
 
         protected internal override CCActionState StartAction(CCNode target)
         {
-            return new CCLiquidState (this, target);
+            return new CCLiquidState (this, GridNode(target));
         }
     }
 
@@ -31,13 +31,16 @@ namespace CocosSharp
     {
         public int Waves { get; set; }
 
-        public CCLiquidState (CCLiquid action, CCNode target) : base (action, target)
+        public CCLiquidState (CCLiquid action, CCNodeGrid target) : base (action, target)
         {
             Waves = action.Waves;
         }
 
         public override void Update (float time)
         {
+            if (Target == null)
+                return;
+            
             int i, j;
 
             for (i = 1; i < GridSize.X; ++i)

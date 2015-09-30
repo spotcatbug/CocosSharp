@@ -42,9 +42,12 @@ namespace CocosDenshion
             { 
                 effectsVolume = CCMathHelper.Clamp(value, 0.0f, 1.0f);
 
-                foreach (CCEffectPlayer soundEffect in list.Values) 
+                lock (list)
                 {
-                    soundEffect.Volume = effectsVolume;
+                    foreach (CCEffectPlayer soundEffect in list.Values)
+                    {
+                        soundEffect.Volume = effectsVolume;
+                    }
                 }
             }
         }
@@ -143,18 +146,86 @@ namespace CocosDenshion
 
         public void PauseEffect(int fxid) 
         {
-            try
+            lock (list)
             {
-                if (list.ContainsKey(fxid))
+                try
                 {
-                    list[fxid].Pause();
+                    if (list.ContainsKey(fxid))
+                    {
+                        list[fxid].Pause();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CCLog.Log("Unexpected exception while playing a SoundEffect: {0}", fxid);
+                    CCLog.Log(ex.ToString());
                 }
             }
-            catch (Exception ex)
+        }
+
+        public void PauseAllEffects()
+        {
+            List<CCEffectPlayer> l = new List<CCEffectPlayer>();
+
+            lock (list)
             {
-                CCLog.Log("Unexpected exception while playing a SoundEffect: {0}", fxid);
-                CCLog.Log(ex.ToString());
+                try
+                {
+                    l.AddRange(list.Values);
+                }
+                catch (Exception ex)
+                {
+                    CCLog.Log("Unexpected exception while pausing all effects.");
+                    CCLog.Log(ex.ToString());
+                }
             }
+            foreach (CCEffectPlayer p in l)
+            {
+                PauseEffect(p.SoundID);
+            }
+        }
+
+        public void ResumeEffect(int fxid)
+        {
+            lock (list)
+            {
+                try
+                {
+                    if (list.ContainsKey(fxid))
+                    {
+                        list[fxid].Resume();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CCLog.Log("Unexpected exception while resuming a SoundEffect: {0}", fxid);
+                    CCLog.Log(ex.ToString());
+                }
+            }
+        }
+
+        public void ResumeAllEffects()
+        {
+
+            List<CCEffectPlayer> l = new List<CCEffectPlayer>();
+
+            lock (list)
+            {
+                try
+                {
+                    l.AddRange(list.Values);
+                }
+                catch (Exception ex)
+                {
+                    CCLog.Log("Unexpected exception while resuming all effects.");
+                    CCLog.Log(ex.ToString());
+                }
+            }
+            foreach (CCEffectPlayer p in l)
+            {
+                p.Resume();
+            }
+
         }
 
         public void StopAllEffects()
@@ -166,17 +237,19 @@ namespace CocosDenshion
                 try
                 {
                     l.AddRange(list.Values);
-                    list.Clear();
                 }
                 catch (Exception ex)
                 {
                     CCLog.Log("Unexpected exception while stopping all effects.");
                     CCLog.Log(ex.ToString());
                 }
-            }
-            foreach (CCEffectPlayer p in l)
-            {
-                p.Stop();
+
+                foreach (CCEffectPlayer p in l)
+                {
+                    StopEffect(p.SoundID);
+                }
+
+                list.Clear();
             }
 
         }
@@ -195,10 +268,13 @@ namespace CocosDenshion
                 {
                     if (list.ContainsKey(fxid))
                     {
-                        list[fxid].Play(bLoop);
-                        if (bLoop)
+                        lock (loopedSounds)
                         {
-                            loopedSounds[fxid] = fxid;
+                            list[fxid].Play(bLoop);
+                            if (bLoop)
+                            {
+                                loopedSounds[fxid] = fxid;
+                            }
                         }
                     }
                 }
@@ -224,10 +300,13 @@ namespace CocosDenshion
                 {
                     if (list.ContainsKey(nId))
                     {
-                        list[nId].Play(loop);
-                        if (loop)
+                        lock (loopedSounds)
                         {
-                            loopedSounds[nId] = nId;
+                            list[nId].Play(loop);
+                            if (loop)
+                            {
+                                loopedSounds[nId] = nId;
+                            }
                         }
                     }
                 }
@@ -261,16 +340,13 @@ namespace CocosDenshion
 
         public void StopAllLoopingEffects()
         {
-            lock (list)
+            if (loopedSounds.Count > 0)
             {
-                if (loopedSounds.Count > 0)
+                int[] a = new int[loopedSounds.Keys.Count];
+                loopedSounds.Keys.CopyTo(a, 0);
+                foreach (int key in a)
                 {
-                    int[] a = new int[loopedSounds.Keys.Count];
-                    loopedSounds.Keys.CopyTo(a, 0);
-                    foreach (int key in a)
-                    {
-                        StopEffect(key);
-                    }
+                    StopEffect(key);
                 }
             }
         }
@@ -295,7 +371,10 @@ namespace CocosDenshion
             CCEffectPlayer eff = new CCEffectPlayer();
             eff.Open(FullPath(filename), nId);
             eff.Volume = effectsVolume;
-            list[nId] = eff;
+            lock (list)
+            {
+                list[nId] = eff;
+            }
         }
 
         public void UnloadEffect(string filename)

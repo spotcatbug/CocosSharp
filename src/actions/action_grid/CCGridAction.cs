@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 
 namespace CocosSharp
@@ -25,9 +26,21 @@ namespace CocosSharp
 		#endregion Constructors
 
 
+        protected CCNodeGrid GridNode(CCNode target)
+        {
+            var gridNodeTarget = target as CCNodeGrid;
+            if (gridNodeTarget == null)
+            {
+                CCLog.Log("Grid Actions can only target CCNodeGrids.");
+                return null;
+            }
+
+            return gridNodeTarget;
+        }
+
 		protected internal override CCActionState StartAction(CCNode target)
 		{
-			return new CCGridActionState (this, target);
+            return new CCGridActionState (this, GridNode(target));
 		}
 
 		public override CCFiniteTimeAction Reverse ()
@@ -48,10 +61,21 @@ namespace CocosSharp
 			protected set { } 
 		}
 
-		public CCGridActionState (CCGridAction action, CCNode target) : base (action, target)
+        public CCGridActionState (CCGridAction action, CCNodeGrid target) : base (action, target)
 		{
 			GridSize = action.GridSize;
-			CCGridBase targetGrid = Target.Grid;
+
+            // If target is not a CCNodeGrid we will want to emmit a message and 
+            // return or there can be possible NRE's later on.
+            var gridNodeTarget = Target as CCNodeGrid;
+            if (gridNodeTarget == null)
+            {
+                Debug.Assert(false, "Grid Actions only target CCNodeGrids.");
+                CCLog.Log("Grid Actions only target CCNodeGrids.");
+                return;
+            }
+
+            CCGridBase targetGrid = target.Grid;
 
 			if (targetGrid != null && targetGrid.ReuseGrid > 0)
 			{
@@ -74,9 +98,11 @@ namespace CocosSharp
 				}
 
 				CCGridBase newgrid = Grid;
-
-				Target.Grid = newgrid;
-				Target.Grid.Active = true;
+                if (target != null)
+                {
+                    target.Grid = newgrid;
+                    target.Grid.Active = true;
+                }
 			}
 		}
 	}

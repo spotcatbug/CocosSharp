@@ -11,7 +11,7 @@
     <RootNamespace>tests</RootNamespace>
     <AssemblyName>CocosSharpTests</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -47,12 +47,12 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="classes\AppDelegate.cs" />
     <Compile Include="classes\BaseTest.cs" />
     <Compile Include="classes\controller.cs" />
-    <Compile Include="classes\test.cs" />
     <Compile Include="classes\testBasic.cs" />
     <Compile Include="classes\testResource.cs" />
     <Compile Include="classes\TestNavigationLayer.cs" />
@@ -209,6 +209,41 @@
     <Compile Include="classes\tests\FontTest\SystemFontTest.cs" />
     <Compile Include="classes\tests\IntervalTest\IntervalLayer.cs" />
     <Compile Include="classes\tests\IntervalTest\IntervalTestScene.cs" />
+    <Compile Include="classes\tests\LabelTestNew\AtlasTestSceneNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTAdditionalKerningTest.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTandSFEmpty.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTBounds.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTColor.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTColorAndOpacity.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTContentSizeRatios.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTFlippedY.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTGlyphDesigner.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTHundredLabels.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTLineHeightTest.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTMultiLine.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTMultiLineAlignment.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTOffset.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTOldNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTPadding.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTRetina.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTSpriteActions.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTUNICODELanguages.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFSTextureView.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFAlignmentTest.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFColor.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFContentSizeRatios.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFLongLineWrapping.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFOldNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFont168.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontAlignmentTest.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontColor.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontColorAndOpacity.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontRenderTexture.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontUnicodeJapanese.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelTestNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelTTFAlignmentNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelTTFFontsTestNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelTTFUnicodeChinese.cs" />
     <Compile Include="classes\tests\LabelTest\Atlas1.cs" />
     <Compile Include="classes\tests\LabelTest\Atlas3.cs" />
     <Compile Include="classes\tests\LabelTest\Atlas4.cs" />
@@ -314,6 +349,7 @@
     <Compile Include="classes\tests\PerformanceTest\PerformanceTouchesTest\TouchesPerformTest2.cs" />
     <Compile Include="classes\tests\PerformanceTest\PerformBasicLayer.cs" />
     <Compile Include="classes\tests\Physics\PhysicsTest.cs" />
+    <Compile Include="classes\tests\RendererTest\RendererTestDemo.cs" />
     <Compile Include="classes\tests\RenderTextureTest\RenderTextureCompositeTest.cs" />
     <Compile Include="classes\tests\RenderTextureTest\RenderTextureIssue937.cs" />
     <Compile Include="classes\tests\RenderTextureTest\RenderTextureSave.cs" />
@@ -390,6 +426,7 @@
     <Compile Include="classes\tests\SpriteTest\SpriteTestScene.cs" />
     <Compile Include="classes\tests\SpriteTest\SpriteZOrder.cs" />
     <Compile Include="classes\tests\SpriteTest\SpriteZVertex.cs" />
+    <Compile Include="classes\tests\TextInputTest\CustomIME\UppercaseIMEKeyboardImpl.cs" />
     <Compile Include="classes\tests\TextInputTest\TextInputTest.cs" />
     <Compile Include="classes\tests\TextInputTest\TextInputTestScene.cs" />
     <Compile Include="classes\tests\Texture2dTest\Texture2dTest.cs" />
@@ -429,6 +466,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -470,18 +508,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\testsContent\TileMaps\iso-test-zorder1.tmx">
+      <Link>Content\TileMaps\iso-test-zorder1.tmx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="app.config" />
-    <EmbeddedResource Include="Assets\Content\fonts\A Damn Mess.ttf" />
-    <EmbeddedResource Include="Assets\Content\fonts\Abberancy.ttf" />
-    <EmbeddedResource Include="Assets\Content\fonts\Abduction.ttf" />
-    <EmbeddedResource Include="Assets\Content\fonts\American Typewriter.ttf" />
-    <EmbeddedResource Include="Assets\Content\fonts\Marker Felt.ttf" />
-    <EmbeddedResource Include="Assets\Content\fonts\Paint Boy.ttf" />
-    <EmbeddedResource Include="Assets\Content\fonts\Schwarzwald Regular.ttf" />
-    <EmbeddedResource Include="Assets\Content\fonts\Scissor Cuts.ttf" />
-    <EmbeddedResource Include="Assets\Content\fonts\tahoma.ttf" />
-    <EmbeddedResource Include="Assets\Content\fonts\Thonburi.ttf" />
-    <EmbeddedResource Include="Assets\Content\fonts\ThonburiBold.ttf" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\animations\" />
@@ -499,7 +530,6 @@
     <Folder Include="Content\Images\sprites_test\" />
     <Folder Include="Content\Particles\" />
     <Folder Include="Content\Sounds\" />
-    <Folder Include="Content\TileMaps\" />
     <Folder Include="Content\zwoptex\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

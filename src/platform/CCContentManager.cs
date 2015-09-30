@@ -175,12 +175,9 @@ namespace CocosSharp
 
             var realName = GetRealName(assetName);
 
-            CheckDefaultPath(searchPaths);
-            CheckDefaultPath(searchResolutionsOrder);
-
-            foreach (var searchPath in searchPaths)
+            foreach (var searchPath in SearchPaths)
             {
-                foreach (string resolutionOrder in searchResolutionsOrder)
+                foreach (string resolutionOrder in SearchResolutionsOrder)
                 {
                     var path = Path.Combine(Path.Combine(searchPath, resolutionOrder), realName);
 
@@ -349,21 +346,20 @@ namespace CocosSharp
         }
 #endif
 
-        public Stream GetAssetStream(string assetName)
+        public Stream GetAssetStream(string assetName, out string fileName)
         {
+            fileName = string.Empty;
             var realName = GetRealName(assetName);
 
-            CheckDefaultPath(searchPaths);
-            CheckDefaultPath(searchResolutionsOrder);
-
-            foreach (var searchPath in searchPaths)
+            foreach (var searchPath in SearchPaths)
             {
-                foreach (string resolutionOrder in searchResolutionsOrder)
+                foreach (string resolutionOrder in SearchResolutionsOrder)
                 {
                     var path = Path.Combine(Path.Combine(RootDirectory, Path.Combine(searchPath, resolutionOrder)), realName);
 
                     try
                     {
+                        fileName = path;
                         //TODO: for platforms with access to the file system, first check for the existence of the file 
                         return TitleContainer.OpenStream(path);
                     }
@@ -374,21 +370,62 @@ namespace CocosSharp
                 }
             }
 
+            fileName = string.Empty;
             throw new ContentLoadException("Failed to load the asset stream from " + assetName);
+        }
+
+        public Stream GetAssetStream(string assetName)
+        {
+            var fileName = string.Empty;
+            return GetAssetStream(assetName, out fileName);
+        }
+
+        public byte[] GetAssetStreamAsBytes(string assetName, out string fileName)
+        {
+            fileName = string.Empty;
+            try
+            {
+                using (Stream assetStream = GetAssetStream(assetName))
+                {
+                    // This used to use a MemoryStream, which could hold a length up to an int.
+                    int length = (int)assetStream.Length;
+                    if (length == 0)
+                        return new byte[0];
+
+                    var buffer = new byte[length];
+                    assetStream.Read(buffer, 0, length);
+                    return buffer;
+                }
+            }
+            catch { return null; }
+        }
+
+        public byte[] GetAssetStreamAsBytes(string assetName)
+        {
+            string fileName;
+            return GetAssetStreamAsBytes(assetName, out fileName);
         }
 
         public List<string> SearchResolutionsOrder
         {
-            get { return searchResolutionsOrder; }
+            get
+            {
+                CheckDefaultPath(searchResolutionsOrder);
+                return searchResolutionsOrder;
+            }
 
-			internal set { searchResolutionsOrder = value; }
+            internal set { searchResolutionsOrder = value; }
         }
 
         public List<string> SearchPaths
         {
-            get { return searchPaths; }
+            get
+            {
+                CheckDefaultPath(searchPaths);
+                return searchPaths;
+            }
 
-			internal set { searchPaths = value; }
+            internal set { searchPaths = value; }
         }
 
         void CheckDefaultPath(List<string> paths)

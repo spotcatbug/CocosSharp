@@ -30,7 +30,7 @@ namespace CocosSharp
         {
             Target = target;
             Enabled = true;
-            AnchorPoint = new CCPoint(0.5f, 0.5f);
+            AnchorPoint = CCPoint.AnchorMiddle;
         }
 
         #endregion Constructors
@@ -45,9 +45,9 @@ namespace CocosSharp
             
         /// <summary>
         /// Register a script function, the function is called in activete
-        /// If pszFunctionName is NULL, then unregister it.
+        /// If functionName is NULL, then unregister it.
         /// </summary>
-        /// <param name="pszFunctionName"></param>
+        /// <param name="functionName"></param>
         public virtual void RegisterScriptHandler(string functionName)
         {
             throw new NotImplementedException("CCMenuItem.RegisterScriptHandler is not supported in this version of Cocos2d-XNA");

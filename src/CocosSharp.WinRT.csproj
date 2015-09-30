@@ -7,13 +7,14 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{158FF52F-6E3B-498C-9C96-A4DA9FD4E6E0}</ProjectGuid>
+    <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CocosSharp</RootNamespace>
     <AssemblyName>CocosSharp</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
     <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <DefaultLanguage>en-US</DefaultLanguage>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,6 +26,8 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Windows8\Debug\CocosSharp.XML</DocumentationFile>
+    <NoWarn>1591;2008</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,12 +37,14 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Windows8\Release\CocosSharp.XML</DocumentationFile>
+    <NoWarn>1591;2008</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\WindowsStore\ARM\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE;NETFX_CORE;MONOGAME</DefineConstants>
-    <NoWarn>;2008</NoWarn>
+    <NoWarn>1591;2008</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>ARM</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
@@ -51,7 +56,7 @@
     <OutputPath>bin\WindowsStore\ARM\Release\</OutputPath>
     <DefineConstants>TRACE;NETFX_CORE;MONOGAME</DefineConstants>
     <Optimize>true</Optimize>
-    <NoWarn>;2008</NoWarn>
+    <NoWarn>1591;2008</NoWarn>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>ARM</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
@@ -63,7 +68,7 @@
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE;NETFX_CORE;MONOGAME</DefineConstants>
-    <NoWarn>;2008</NoWarn>
+    <NoWarn>1591;2008</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
@@ -75,19 +80,20 @@
     <OutputPath>bin\WindowsStore\x64\Release\</OutputPath>
     <DefineConstants>TRACE;NETFX_CORE;MONOGAME</DefineConstants>
     <Optimize>true</Optimize>
-    <NoWarn>;2008</NoWarn>
+    <NoWarn>1591;2008</NoWarn>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn></NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\WindowsStore\x86\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG;NETFX_CORE;MONOGAME</DefineConstants>
-    <NoWarn>;2008</NoWarn>
+    <NoWarn>1591;2008</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
@@ -99,7 +105,7 @@
     <OutputPath>bin\WindowsStore\x86\Release\</OutputPath>
     <DefineConstants>TRACE;NETFX_CORE;WINMONOGAME</DefineConstants>
     <Optimize>true</Optimize>
-    <NoWarn>;2008</NoWarn>
+    <NoWarn>1591;2008</NoWarn>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
@@ -108,6 +114,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="platform\Keyboard\Windows\WinRT\IMEKeyboardImpl.cs" />
+    <Compile Include="text_input_node\CCIMEKeyboardEventArgs.cs" />
+    <Compile Include="text_input_node\CCTextField.cs" />
     <None Include="label_nodes\CCLabel-Gdi.cs" />
     <Compile Include="actions\action\CCAmplitudeAction.cs" />
     <Compile Include="events\CCEvent.cs" />
@@ -131,11 +140,23 @@
     <Compile Include="events\CCEventGamePadConnection.cs" />
     <Compile Include="events\CCEventCustom.cs" />
     <Compile Include="events\CCEventListenerCustom.cs" />
+    <Compile Include="label_nodes\CCFont.cs" />
+    <Compile Include="label_nodes\CCFontAtlas.cs" />
+    <Compile Include="label_nodes\CCFontAtlasCache.cs" />
+    <Compile Include="label_nodes\CCFontFNT.cs" />
+    <Compile Include="label_nodes\CCFontSpriteFont.cs" />
     <Compile Include="label_nodes\CCLabel-FontUtilities-Win8.cs" />
     <Compile Include="label_nodes\CCLabel-FontUtilities.cs" />
     <Compile Include="label_nodes\CCLabel-Windows.cs" />
     <Compile Include="label_nodes\CCLabel.cs" />
+    <Compile Include="label_nodes\CCTextLayout.cs" />
+    <Compile Include="misc_nodes\CCGeometryNode.cs" />
+    <Compile Include="misc_nodes\CCNodeGrid.cs" />
     <Compile Include="platform\CCArrayPool.cs" />
+    <Compile Include="Renderer\CCRenderer.cs" />
+    <Compile Include="Renderer\RenderCommands\CCCustomCommand.cs" />
+    <Compile Include="Renderer\RenderCommands\CCQuadCommand.cs" />
+    <Compile Include="Renderer\RenderCommands\CCRenderCommand.cs" />
     <Compile Include="sprite_nodes\CCMaskedSprite.cs" />
     <Compile Include=".\actions\action\CCAction.cs">
       <LogicalName>actions\action\CCAction</LogicalName>
@@ -682,9 +703,6 @@
     <Compile Include=".\misc_nodes\CCDrawNode.cs">
       <LogicalName>misc_nodes\CCDrawNode</LogicalName>
     </Compile>
-    <Compile Include=".\particle_nodes\CCParticleBatchNode.cs">
-      <LogicalName>particle_nodes\CCParticleBatchNode</LogicalName>
-    </Compile>
     <Compile Include=".\particle_nodes\CCParticleExamples.cs">
       <LogicalName>particle_nodes\CCParticleExamples</LogicalName>
     </Compile>
@@ -799,48 +817,6 @@
     <Compile Include=".\platform\CCReusedObject.cs">
       <LogicalName>platform\ReusedObject</LogicalName>
     </Compile>
-    <Compile Include=".\platform\Zlib\Adler32.cs">
-      <LogicalName>platform\Zlib\Adler32</LogicalName>
-    </Compile>
-    <Compile Include=".\platform\Zlib\Deflate.cs">
-      <LogicalName>platform\Zlib\Deflate</LogicalName>
-    </Compile>
-    <Compile Include=".\platform\Zlib\InfBlocks.cs">
-      <LogicalName>platform\Zlib\InfBlocks</LogicalName>
-    </Compile>
-    <Compile Include=".\platform\Zlib\InfCodes.cs">
-      <LogicalName>platform\Zlib\InfCodes</LogicalName>
-    </Compile>
-    <Compile Include=".\platform\Zlib\Inflate.cs">
-      <LogicalName>platform\Zlib\Inflate</LogicalName>
-    </Compile>
-    <Compile Include=".\platform\Zlib\InfTree.cs">
-      <LogicalName>platform\Zlib\InfTree</LogicalName>
-    </Compile>
-    <Compile Include=".\platform\Zlib\StaticTree.cs">
-      <LogicalName>platform\Zlib\StaticTree</LogicalName>
-    </Compile>
-    <Compile Include=".\platform\Zlib\SupportClass.cs">
-      <LogicalName>platform\Zlib\SupportClass</LogicalName>
-    </Compile>
-    <Compile Include=".\platform\Zlib\Tree.cs">
-      <LogicalName>platform\Zlib\Tree</LogicalName>
-    </Compile>
-    <Compile Include=".\platform\Zlib\ZInputStream.cs">
-      <LogicalName>platform\Zlib\ZInputStream</LogicalName>
-    </Compile>
-    <Compile Include=".\platform\Zlib\Zlib.cs">
-      <LogicalName>platform\Zlib\Zlib</LogicalName>
-    </Compile>
-    <Compile Include=".\platform\Zlib\ZOutputStream.cs">
-      <LogicalName>platform\Zlib\ZOutputStream</LogicalName>
-    </Compile>
-    <Compile Include=".\platform\Zlib\ZStream.cs">
-      <LogicalName>platform\Zlib\ZStream</LogicalName>
-    </Compile>
-    <Compile Include=".\platform\Zlib\ZStreamException.cs">
-      <LogicalName>platform\Zlib\ZStreamException</LogicalName>
-    </Compile>
     <Compile Include=".\predefine\CCMacros.cs">
       <LogicalName>predefine\ccMacros</LogicalName>
     </Compile>
@@ -852,9 +828,6 @@
     </Compile>
     <Compile Include=".\predefine\CCTypes.cs">
       <LogicalName>predefine\CCTypes</LogicalName>
-    </Compile>
-    <Compile Include=".\Properties\AssemblyInfo.cs">
-      <LogicalName>Properties\AssemblyInfo</LogicalName>
     </Compile>
     <Compile Include=".\script_support\CCScriptEngineManager.cs">
       <LogicalName>script_support\CCScriptEngineManager</LogicalName>
@@ -921,14 +894,8 @@
     <Compile Include=".\text_input_node\CCIMEKeyboardNotificationInfo.cs">
       <LogicalName>text_input_node\CCIMEKeyboardNotificationInfo</LogicalName>
     </Compile>
-    <Compile Include=".\text_input_node\CCTextFieldTTF.cs">
-      <LogicalName>text_input_node\CCTextFieldTTF </LogicalName>
-    </Compile>
     <Compile Include=".\text_input_node\ICCIMEDelegate.cs">
       <LogicalName>text_input_node\ICCIMEDelegate</LogicalName>
-    </Compile>
-    <Compile Include=".\text_input_node\ICCTextFieldDelegate.cs">
-      <LogicalName>text_input_node\ICCTextFieldDelegate</LogicalName>
     </Compile>
     <Compile Include=".\tileMap_parallax_nodes\CCParallaxNode.cs">
       <LogicalName>tileMap_parallax_nodes\CCParallaxNode</LogicalName>
@@ -937,25 +904,28 @@
       <LogicalName>tileMap_parallax_nodes\CCPointObject</LogicalName>
     </Compile>
     <Compile Include=".\tileMap_parallax_nodes\CCTileLayerInfo.cs">
-        <LogicalName>tileMap_parallax_nodes\CCTileLayerInfo</LogicalName>
+      <LogicalName>tileMap_parallax_nodes\CCTileLayerInfo</LogicalName>
     </Compile>
     <Compile Include=".\tileMap_parallax_nodes\CCTileMap.cs">
-        <LogicalName>tileMap_parallax_nodes\CCTileMap</LogicalName>
+      <LogicalName>tileMap_parallax_nodes\CCTileMap</LogicalName>
     </Compile>
     <Compile Include=".\tileMap_parallax_nodes\CCTileMapInfo.cs">
-        <LogicalName>tileMap_parallax_nodes\CCTileMapInfo</LogicalName>
+      <LogicalName>tileMap_parallax_nodes\CCTileMapInfo</LogicalName>
     </Compile>
     <Compile Include=".\tileMap_parallax_nodes\CCTileMapLayer.cs">
-        <LogicalName>tileMap_parallax_nodes\CCTileMapLayer</LogicalName>
+      <LogicalName>tileMap_parallax_nodes\CCTileMapLayer</LogicalName>
     </Compile>
     <Compile Include=".\tileMap_parallax_nodes\CCTileMapObjectGroup.cs">
-        <LogicalName>tileMap_parallax_nodes\CCTileMapObjectGroup</LogicalName>
+      <LogicalName>tileMap_parallax_nodes\CCTileMapObjectGroup</LogicalName>
     </Compile>
     <Compile Include=".\tileMap_parallax_nodes\CCTileMapStructs.cs">
-        <LogicalName>tileMap_parallax_nodes\CCTileMapStructs</LogicalName>
+      <LogicalName>tileMap_parallax_nodes\CCTileMapStructs</LogicalName>
     </Compile>
     <Compile Include=".\tileMap_parallax_nodes\CCTileSetInfo.cs">
-        <LogicalName>tileMap_parallax_nodes\CCTileSetInfo</LogicalName>
+      <LogicalName>tileMap_parallax_nodes\CCTileSetInfo</LogicalName>
+    </Compile>
+    <Compile Include=".\tileMap_parallax_nodes\CCTileAnimation.cs">
+      <LogicalName>tileMap_parallax_nodes\CCTileAnimation</LogicalName>
     </Compile>
     <Compile Include=".\Win8IOExtensions.cs">
       <LogicalName>Win8IOExtensions</LogicalName>
@@ -985,10 +955,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>external lib\XBox360\ICSharpCode.SharpZipLib.dll</HintPath>
-    </Reference>
     <Reference Include="SharpDX">
       <HintPath>..\MonoGame\ThirdParty\Dependencies\SharpDX\Windows 8 Metro\SharpDX.dll</HintPath>
     </Reference>
@@ -997,7 +963,7 @@
     </Reference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '11.0' ">
-    <VisualStudioVersion>11.0</VisualStudioVersion>
+    <VisualStudioVersion>12.0</VisualStudioVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

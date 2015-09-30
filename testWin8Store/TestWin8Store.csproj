@@ -13,6 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PackageCertificateKeyFile>TestWin8Store_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>ARM</PlatformTarget>
@@ -120,9 +121,6 @@
     </Compile>
     <Compile Include="..\tests\tests\classes\controller.cs">
       <Link>classes\controller</Link>
-    </Compile>
-    <Compile Include="..\tests\tests\classes\test.cs">
-      <Link>classes\test</Link>
     </Compile>
     <Compile Include="..\tests\tests\classes\testBasic.cs">
       <Link>classes\testBasic</Link>
@@ -345,6 +343,111 @@
     </Compile>
     <Compile Include="..\tests\tests\classes\tests\Box2DTestBet%28Box2D%29\Tests\LiquidTest.cs">
       <Link>classes\tests\Box2DTestBet%28Box2D%29\Tests\LiquidTest</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\AtlasTestSceneNew.cs">
+      <Link>classes\tests\LabelTestNew\AtlasTestSceneNew.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTAdditionalKerningTest.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTAdditionalKerningTest.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTandSFEmpty.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTandSFEmpty.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTBounds.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTBounds.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTColor.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTColor.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTColorAndOpacity.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTColorAndOpacity.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTContentSizeRatios.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTContentSizeRatios.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTFlippedY.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTFlippedY.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTGlyphDesigner.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTGlyphDesigner.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTHundredLabels.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTHundredLabels.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTLineHeightTest.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTLineHeightTest.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTMultiLine.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTMultiLine.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTMultiLineAlignment.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTMultiLineAlignment.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTOffset.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTOffset.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTOldNew.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTOldNew.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTPadding.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTPadding.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTRetina.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTRetina.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTSpriteActions.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTSpriteActions.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFNTUNICODELanguages.cs">
+      <Link>classes\tests\LabelTestNew\LabelFNTUNICODELanguages.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelFSTextureView.cs">
+      <Link>classes\tests\LabelTestNew\LabelFSTextureView.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelSFAlignmentTest.cs">
+      <Link>classes\tests\LabelTestNew\LabelSFAlignmentTest.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelSFColor.cs">
+      <Link>classes\tests\LabelTestNew\LabelSFColor.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelSFContentSizeRatios.cs">
+      <Link>classes\tests\LabelTestNew\LabelSFContentSizeRatios.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelSFLongLineWrapping.cs">
+      <Link>classes\tests\LabelTestNew\LabelSFLongLineWrapping.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelSFOldNew.cs">
+      <Link>classes\tests\LabelTestNew\LabelSFOldNew.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelSystemFont168.cs">
+      <Link>classes\tests\LabelTestNew\LabelSystemFont168.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelSystemFontAlignmentTest.cs">
+      <Link>classes\tests\LabelTestNew\LabelSystemFontAlignmentTest.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelSystemFontColor.cs">
+      <Link>classes\tests\LabelTestNew\LabelSystemFontColor.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelSystemFontColorAndOpacity.cs">
+      <Link>classes\tests\LabelTestNew\LabelSystemFontColorAndOpacity.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelSystemFontRenderTexture.cs">
+      <Link>classes\tests\LabelTestNew\LabelSystemFontRenderTexture.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelSystemFontUnicodeJapanese.cs">
+      <Link>classes\tests\LabelTestNew\LabelSystemFontUnicodeJapanese.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelTestNew.cs">
+      <Link>classes\tests\LabelTestNew\LabelTestNew.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelTTFAlignmentNew.cs">
+      <Link>classes\tests\LabelTestNew\LabelTTFAlignmentNew.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelTTFFontsTestNew.cs">
+      <Link>classes\tests\LabelTestNew\LabelTTFFontsTestNew.cs</Link>
+    </Compile>
+    <Compile Include="..\tests\tests\classes\tests\LabelTestNew\LabelTTFUnicodeChinese.cs">
+      <Link>classes\tests\LabelTestNew\LabelTTFUnicodeChinese.cs</Link>
     </Compile>
     <Compile Include="..\tests\tests\classes\tests\MultiTouchTest\MultiTouchTest.cs">
       <Link>classes\tests\MultiTouchTest\MultiTouchTest.cs</Link>
@@ -901,6 +1004,9 @@
     <Compile Include="..\tests\tests\classes\tests\PerformanceTest\PerformBasicLayer.cs">
       <Link>classes\tests\PerformanceTest\PerformBasicLayer</Link>
     </Compile>
+    <Compile Include="..\tests\tests\classes\tests\RendererTest\RendererTestDemo.cs">
+      <Link>classes\tests\Renderer\RendererTestDemo.cs</Link>
+    </Compile>
     <Compile Include="..\tests\tests\classes\tests\RenderTextureTest\RenderTextureCompositeTest.cs">
       <Link>classes\tests\RenderTextureTest\RenderTextureCompositeTest</Link>
     </Compile>
@@ -1129,6 +1235,9 @@
     <Compile Include="..\tests\tests\classes\tests\SpriteTest\SpriteZVertex.cs">
       <Link>classes\tests\SpriteTest\SpriteZVertex</Link>
     </Compile>
+    <Compile Include="..\tests\tests\classes\tests\TextInputTest\CustomIME\UppercaseIMEKeyboardImpl.cs">
+      <Link>classes\tests\TextInputTest\UppercaseIMEKeyboardImpl.cs</Link>
+    </Compile>
     <Compile Include="..\tests\tests\classes\tests\TextInputTest\TextInputTest.cs">
       <Link>classes\tests\TextInputTest\TextInputTest</Link>
     </Compile>
@@ -1234,6 +1343,14 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
+    <Content Include="..\tests\testsContent\TileMaps\iso-test-zorder1.tmx">
+      <Link>Content\TileMaps\iso-test-zorder1.tmx</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\tests\tests\Assets\Content\fonts\Schwarzwald.ttf">
+      <Link>Content\fonts\Schwarzwald.ttf</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="TestWin8Store_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

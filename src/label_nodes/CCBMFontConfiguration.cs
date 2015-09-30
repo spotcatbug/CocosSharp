@@ -59,10 +59,11 @@ namespace CocosSharp
         internal CCBMFontConfiguration(string fntFile)
             : this(CCContentManager.SharedContentManager.Load<string>(fntFile), fntFile)
         { }
-        
+
 
         // Content pipeline makes use of this constructor
-        internal CCBMFontConfiguration(string data, string fntFile) : base()
+        internal CCBMFontConfiguration(string data, string fntFile)
+            : base()
         {
             Glyphs = new Dictionary<int, CCBMGlyphDef>();
             CharacterSet = new List<int>();
@@ -79,9 +80,9 @@ namespace CocosSharp
 
         private List<int> ParseConfigFile(string pBuffer, string fntFile)
         {
-            long nBufSize = pBuffer.Length;
-
             Debug.Assert(pBuffer != null, "CCBMFontConfiguration::parseConfigFile | Open file error.");
+
+            long nBufSize = pBuffer.Length;
 
             if (string.IsNullOrEmpty(pBuffer))
             {
@@ -282,11 +283,9 @@ namespace CocosSharp
             int index = line.IndexOf('=') + 1;
             int index2 = line.IndexOf(' ', index);
             string value = line.Substring(index, index2 - index);
-            try
-            {
-                int ivalue = int.Parse(value);
-            }
-            catch (Exception)
+
+            int ivalue;
+            if (!int.TryParse(value, out ivalue))
             {
                 throw (new ContentLoadException("Invalid page ID for FNT descriptor. Line=" + line + ", value=" + value + ", indices=" + index + "," + index2));
             }
@@ -300,7 +299,13 @@ namespace CocosSharp
 
             var directory = string.Empty;
             if (!CCFileUtils.GetDirectoryName(value, out directory))
-                AtlasName = CCFileUtils.FullPathFromRelativeFile(value, fntFile);
+            {
+                try
+                {
+                    AtlasName = CCFileUtils.FullPathFromRelativeFile(value, fntFile);
+                }
+                catch { }
+            }
         }
 
         private void parseKerningEntry(string line)

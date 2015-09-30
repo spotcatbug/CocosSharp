@@ -27,7 +27,7 @@ namespace CocosSharp
 
         protected internal override CCActionState StartAction(CCNode target)
         {
-            return new CCTwirlState (this, target);
+            return new CCTwirlState (this, GridNode(target));
         }
     }
 
@@ -40,7 +40,7 @@ namespace CocosSharp
 
         public CCPoint PositionInPixels { get; set; }
 
-        public CCTwirlState (CCTwirl action, CCNode target) : base (action, target)
+        public CCTwirlState (CCTwirl action, CCNodeGrid target) : base (action, target)
         {
             Twirls = action.Twirls;
             PositionInPixels = action.Position;
@@ -48,6 +48,9 @@ namespace CocosSharp
 
         public override void Update (float time)
         {
+            if (Target == null)
+                return;
+            
             int i, j;
             CCPoint avg = CCPoint.Zero;
             CCPoint c = PositionInPixels;

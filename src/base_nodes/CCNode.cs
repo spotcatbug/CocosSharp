@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System.Threading.Tasks;
 #if USE_PHYSICS
 using ChipmunkSharp;
 #endif
@@ -73,18 +74,18 @@ namespace CocosSharp
 
     public class CCNode : ICCUpdatable, ICCFocusable, IComparer<CCNode>, IComparable<CCNode>
     {
-        public const int TagInvalid = -1;                               // Use this to determine if a tag has been set on the node.
-        static uint globalOrderOfArrival = 1;
+        // Use this to determine if a tag has been set on the node.
+        public const int TagInvalid = -1;                               
 
         bool ignoreAnchorPointForPosition;
         bool isCleaned = false;
         bool isOpacityCascaded;
         bool isColorCascaded;
+        bool transformIsDirty;
 
         int tag;
+        uint arrivalIndex, currentChildArrivalIndex;
         int zOrder;
-        int localZOrder;
-        float globalZOrder;
         float vertexZ;
 
         float rotationX;
@@ -110,14 +111,11 @@ namespace CocosSharp
 
         Dictionary<int, List<CCNode>> childrenByTag;
 
-        CCGridBase grid;
-
         CCScene scene;
         CCLayer layer;
 
         CCNode parent;
 
-        Matrix xnaLocalMatrix;
         CCAffineTransform affineLocalTransform;
         CCAffineTransform additionalTransform;
 
@@ -199,8 +197,6 @@ namespace CocosSharp
         public string Name { get; set; }
         public CCRawList<CCNode> Children { get; protected set; }
 
-        internal protected uint OrderOfArrival { get; internal set; }
-
         protected bool IsReorderChildDirty { get; set; }
         protected byte RealOpacity { get; set; }
         protected CCColor3B RealColor { get; set; }
@@ -220,7 +216,7 @@ namespace CocosSharp
                 if (value != ignoreAnchorPointForPosition)
                 {
                     ignoreAnchorPointForPosition = value;
-                    UpdateTransform();
+                    transformIsDirty = true;
                 }
             }
         }
@@ -322,27 +318,12 @@ namespace CocosSharp
             get { return zOrder; }
             set
             {
-                zOrder = value;
-                if (Parent != null)
+                if(zOrder != value)
                 {
-                    Parent.ReorderChild(this, value);
-                }
-            }
-        }
-
-        public int LocalZOrder 
-        { 
-            get { return localZOrder; }
-
-            set 
-            {
-                if (localZOrder != value)
-                {
-                    localZOrder = value;
                     if (Parent != null)
-                    {
-                        Parent.ReorderChild(this, localZOrder);
-                    }
+                        Parent.ReorderChild(this, value);
+                    
+                    zOrder = value;
 
                     if(EventDispatcher != null)
                         EventDispatcher.MarkDirty = this;
@@ -355,21 +336,6 @@ namespace CocosSharp
             get { return ActionManager != null ? ActionManager.NumberOfRunningActionsInTarget (this) : 0; }
         }
 
-        public float GlobalZOrder 
-        { 
-            get { return globalZOrder; }
-            set
-            {
-                if (globalZOrder != value)
-                {
-                    globalZOrder = value;
-                    if (EventDispatcher != null)
-                        EventDispatcher.MarkDirty = this;
-                }
-
-            }
-        }
-
         public virtual float VertexZ 
         {
             get { return vertexZ; }
@@ -378,7 +344,7 @@ namespace CocosSharp
                 if (vertexZ != value)
                 {
                     vertexZ = value;
-                    UpdateTransform();
+                    transformIsDirty = true;
                 }
             }
         }
@@ -389,7 +355,7 @@ namespace CocosSharp
             set
             {
                 skewX = value;
-                UpdateTransform();
+                transformIsDirty = true;
 
 #if USE_PHYSICS
 				if (_physicsBody != null)
@@ -407,7 +373,7 @@ namespace CocosSharp
             set
             {
                 skewY = value;
-                UpdateTransform();
+                transformIsDirty = true;
 
 #if USE_PHYSICS
 				if (_physicsBody != null)
@@ -425,7 +391,7 @@ namespace CocosSharp
             set
             {
                 rotationX = rotationY = value;
-                UpdateTransform();
+                transformIsDirty = true;
 
 #if USE_PHYSICS
 				if (_physicsBody == null || !_physicsBody._rotationResetTag)
@@ -443,7 +409,7 @@ namespace CocosSharp
             set
             {
                 rotationX = value;
-                UpdateTransform();
+                transformIsDirty = true;
             }
         }
 
@@ -453,7 +419,7 @@ namespace CocosSharp
             set
             {
                 rotationY = value;
-                UpdateTransform();
+                transformIsDirty = true;
             }
         }
 
@@ -463,7 +429,7 @@ namespace CocosSharp
             set
             {
                 scaleX = scaleY = value;
-                UpdateTransform();
+                transformIsDirty = true;
 
 #if USE_PHYSICS
 				UpdatePhysicsBodyTransform(Scene);
@@ -478,7 +444,7 @@ namespace CocosSharp
             set
             {
                 scaleX = value;
-                UpdateTransform();
+                transformIsDirty = true;
 
 #if USE_PHYSICS
 				UpdatePhysicsBodyTransform(Scene);
@@ -493,7 +459,7 @@ namespace CocosSharp
             set
             {
                 scaleY = value;
-                UpdateTransform();
+                transformIsDirty = true;
 
 #if USE_PHYSICS
 				UpdatePhysicsBodyTransform(Scene);
@@ -542,7 +508,7 @@ namespace CocosSharp
                 if (position != value || value == CCPoint.Zero) 
                 {
                     position = value;
-                    UpdateTransform();
+                    transformIsDirty = true;
 
 #if USE_PHYSICS
 					if (_physicsBody == null || !_physicsBody._positionResetTag)
@@ -571,6 +537,11 @@ namespace CocosSharp
         public virtual CCPoint AnchorPointInPoints
         {
             get { return anchorPointInPoints; }
+            internal set 
+            { 
+                anchorPointInPoints = value;
+                transformIsDirty = true;
+            }
         }
 
         // Returns the Anchor Point of the node as a value [0,1], where 1 is 100% of the dimension and 0 is 0%.
@@ -594,14 +565,18 @@ namespace CocosSharp
                 {
                     anchorPoint = value;
                     anchorPointInPoints = new CCPoint(contentSize.Width * anchorPoint.X, contentSize.Height * anchorPoint.Y);
-                    UpdateTransform();
+                    transformIsDirty = true;
                 }
             }
         }
 
         public virtual CCSize ScaledContentSize
         {
-            get { return new CCSize(ContentSize.Width * ScaleX, ContentSize.Height * ScaleY); }
+            get 
+            {
+                var sizeToScale = ContentSize;
+                return new CCSize(sizeToScale.Width * ScaleX, sizeToScale.Height * ScaleY); 
+            }
         }
 
         public virtual CCSize ContentSize
@@ -614,7 +589,7 @@ namespace CocosSharp
                     contentSize = value;
                     anchorPointInPoints = new CCPoint(contentSize.Width * anchorPoint.X, contentSize.Height * anchorPoint.Y);
 
-                    UpdateTransform();
+                    transformIsDirty = true;
                 }
             }
         }
@@ -659,7 +634,7 @@ namespace CocosSharp
 
         public virtual CCAffineTransform AffineLocalTransform
         {
-            get { return affineLocalTransform; }
+            get { if(transformIsDirty) UpdateTransform(); return affineLocalTransform; }
         }
 
         public CCAffineTransform AffineWorldTransform
@@ -670,7 +645,8 @@ namespace CocosSharp
                 CCNode parent = this.Parent;
                 if (parent != null) 
                 {
-                    worldTransform = CCAffineTransform.Concat(AffineLocalTransform, parent.AffineWorldTransform);
+                    var parentTransform = parent.AffineWorldTransform;
+                    CCAffineTransform.Concat(ref worldTransform, ref parentTransform, out worldTransform);
                 }
 
                 return worldTransform;
@@ -685,7 +661,7 @@ namespace CocosSharp
                 if (value != additionalTransform) 
                 {
                     additionalTransform = value;
-                    UpdateTransform();
+                    transformIsDirty = true;
                 }
             }
         }
@@ -693,20 +669,6 @@ namespace CocosSharp
         public CCNode this[int tag]
         {
             get { return GetChildByTag(tag); }
-        }
-
-        public CCGridBase Grid 
-        { 
-            get { return grid; }
-            set 
-            {
-                grid = value;
-                if(value != null) 
-                {
-                    grid.Scene = Scene;
-                    grid.Layer = Layer;
-                }
-            }
         }
             
         public virtual CCScene Scene
@@ -732,9 +694,6 @@ namespace CocosSharp
                             child.Scene = scene;
                         }
                     }
-
-                    if (grid != null)
-                        grid.Scene = scene;
 
                     if (scene != null) 
                     {
@@ -785,9 +744,6 @@ namespace CocosSharp
 
                         OnLayerVisibleBoundsChanged(this, null);
                     }
-
-                    if (grid != null)
-                        grid.Scene = scene;
 
                     if (layer != null && layer.Scene != null)
                         this.Scene = layer.Scene;
@@ -841,28 +797,14 @@ namespace CocosSharp
             set { Scene.Viewport = value; }
         }
 
-        protected internal virtual Matrix XnaLocalMatrix 
-        { 
-            get { return xnaLocalMatrix; }
-            protected set 
-            {
-                xnaLocalMatrix = value;
-            }
+        public CCRenderer Renderer
+        {
+            get { return Window != null ? Window.Renderer : DrawManager.Renderer; }
         }
 
-        protected internal Matrix XnaWorldMatrix 
-        { 
-            get
-            {
-                Matrix xnaWorldMatrix = xnaLocalMatrix;
-                CCNode parent = this.Parent;
-                if (parent != null)
-                {
-                    xnaWorldMatrix *= parent.XnaWorldMatrix;
-                }
-
-                return xnaWorldMatrix;
-            }
+        internal CCDrawManager DrawManager 
+        {
+            get  { return Window != null ? Window.DrawManager : CCDrawManager.SharedDrawManager; }
         }
 
         internal virtual CCEventDispatcher EventDispatcher 
@@ -888,7 +830,7 @@ namespace CocosSharp
                 if (fauxLocalCameraCenter != value) 
                 {
                     fauxLocalCameraCenter = value;
-                    UpdateTransform();
+                    transformIsDirty = true;
                 }
             }
         }
@@ -901,7 +843,7 @@ namespace CocosSharp
                 if (fauxLocalCameraTarget != value) 
                 {
                     fauxLocalCameraTarget = value;
-                    UpdateTransform();
+                    transformIsDirty = true;
                 }
             }
         }
@@ -914,7 +856,7 @@ namespace CocosSharp
                 if (fauxLocalCameraUpDirection != value) 
                 {
                     fauxLocalCameraUpDirection = value;
-                    UpdateTransform();
+                    transformIsDirty = true;
                 }
             }
         }
@@ -941,7 +883,6 @@ namespace CocosSharp
 
         public CCNode()
         {
-
 #if USE_PHYSICS
 			_physicsBody = null;
 			_physicsScaleStartX = 1.0f;
@@ -949,7 +890,6 @@ namespace CocosSharp
 #endif
 
             additionalTransform = CCAffineTransform.Identity;
-            xnaLocalMatrix = Matrix.Identity;
             scaleX = 1.0f;
             scaleY = 1.0f;
             Visible = true;
@@ -967,7 +907,7 @@ namespace CocosSharp
 
             FauxLocalCameraUpDirection = new CCPoint3(0.0f, 1.0f, 0.0f);
         }
-
+            
         #endregion Constructors
 
 
@@ -1370,7 +1310,6 @@ namespace CocosSharp
             CCSerialization.SerializeData(ignoreAnchorPointForPosition, sw);
             CCSerialization.SerializeData(IsRunning, sw);
             CCSerialization.SerializeData(IsReorderChildDirty, sw);
-            CCSerialization.SerializeData(OrderOfArrival, sw);
             CCSerialization.SerializeData(tag, sw);
             CCSerialization.SerializeData(zOrder, sw);
             CCSerialization.SerializeData(anchorPoint, sw);
@@ -1408,7 +1347,6 @@ namespace CocosSharp
             ignoreAnchorPointForPosition = CCSerialization.DeSerializeBool(sr);
             IsRunning = CCSerialization.DeSerializeBool(sr);
             IsReorderChildDirty = CCSerialization.DeSerializeBool(sr);
-            OrderOfArrival = (uint)CCSerialization.DeSerializeInt(sr);
             tag = CCSerialization.DeSerializeInt(sr);
             zOrder = CCSerialization.DeSerializeInt(sr);
             AnchorPoint = CCSerialization.DeSerializePoint(sr);
@@ -1454,13 +1392,7 @@ namespace CocosSharp
 
         #region AddChild
 
-        public void AddChild(CCNode child)
-        {
-            Debug.Assert(child != null, "Argument must be no-null");
-            AddChild(child, child.LocalZOrder, child.Tag);
-        }
-
-        public void AddChild(CCNode child, int zOrder)
+        public void AddChild(CCNode child, int zOrder = 0)
         {
             Debug.Assert(child != null, "Argument must be no-null");
             AddChild(child, zOrder, child.Tag);
@@ -1477,11 +1409,12 @@ namespace CocosSharp
                 Children = new CCRawList<CCNode>();
             }
 
+            child.arrivalIndex = ++currentChildArrivalIndex;
+
             InsertChild(child, zOrder, tag);
 
             child.Parent = this;
             child.tag = tag;
-            child.OrderOfArrival = globalOrderOfArrival++;
             if (child.isCleaned)
             {
                 child.ResetCleanState();
@@ -1516,7 +1449,6 @@ namespace CocosSharp
             ChangedChildTag(child, TagInvalid, tag);
 
             child.zOrder = z;
-            child.LocalZOrder = z;
         }
 
         #endregion AddChild
@@ -1662,35 +1594,22 @@ namespace CocosSharp
 
         int IComparer<CCNode>.Compare(CCNode n1, CCNode n2)
         {
-            if (n1.LocalZOrder < n2.LocalZOrder || (n1.LocalZOrder == n2.LocalZOrder && n1.OrderOfArrival < n2.OrderOfArrival))
-            {
-                return -1;
-            }
-
-            if (n1 == n2)
-            {
-                return 0;
-            }
-
-            return 1;
+            return n1.CompareTo(n2);
         }
 
         public int CompareTo(CCNode that)
         {
-            if (this.LocalZOrder < that.LocalZOrder || (this.LocalZOrder == that.LocalZOrder && this.OrderOfArrival < that.OrderOfArrival))
-            {
-                return -1;
-            }
+            int compare = ZOrder.CompareTo(that.ZOrder);
 
-            if (this == that)
-            {
-                return 0;
-            }
+            // In the case where zOrders are equivalent, resort to ordering
+            // based on when children were added to parent
+            if(compare == 0)
+                compare = arrivalIndex.CompareTo(that.arrivalIndex);
 
-            return 1;
+            return compare;
         }
 
-        public virtual void SortAllChildren()
+        public void SortAllChildren()
         {
             if (IsReorderChildDirty)
             {
@@ -1730,16 +1649,14 @@ namespace CocosSharp
 
         public virtual void ReorderChild(CCNode child, int zOrder)
         {
-            // lets not do anything here if the z-order is not to be changed
-            if (child.localZOrder == zOrder && child.zOrder == zOrder)
-                return;
-
             Debug.Assert(child != null, "Child must be non-null");
 
+            // lets not do anything here if the z-order is not to be changed
+            if (child.zOrder == zOrder)
+                return;
+
             IsReorderChildDirty = true;
-            child.OrderOfArrival = globalOrderOfArrival++;
             child.zOrder = zOrder;
-            child.LocalZOrder = zOrder;
         }
 
         #endregion Child Sorting
@@ -1986,9 +1903,10 @@ namespace CocosSharp
         }
 
         /// <summary>
-        /// Convenience method to dispatch a custom event
+        /// Dispatchs a custom event.
         /// </summary>
-        /// <param name="eventToDispatch"></param>
+        /// <param name="customEvent">Custom event.</param>
+        /// <param name="userData">User data.</param>
         public void DispatchEvent(string customEvent, object userData = null)
         {
             if (EventDispatcherIsEnabled)
@@ -2014,104 +1932,42 @@ namespace CocosSharp
         {
         }
 
-        protected virtual void Draw()
+        public void Visit()
         {
+            var identity = CCAffineTransform.Identity;
+            Visit(ref identity);
         }
 
-        // This is called with every call to the MainLoop on the CCDirector class. In XNA, this is the same as the Draw() call.
-        public virtual void Visit()
+        public virtual void Visit(ref CCAffineTransform parentWorldTransform)
         {
-            if (!Visible || Scene == null)
-            {
+            if(!Visible)
                 return;
-            }
 
-            // Set camera view/proj matrix even if ChildClippingMode is None
-            if(Camera != null)
+            if(transformIsDirty)
+                UpdateTransform();
+            
+
+            var worldTransform = CCAffineTransform.Identity;
+            CCAffineTransform.Concat(ref affineLocalTransform, ref parentWorldTransform, out worldTransform);
+
+            SortAllChildren();
+
+            VisitRenderer(ref worldTransform);
+
+            if(Children != null)
             {
-                Window.DrawManager.ViewMatrix = Camera.ViewMatrix;
-                Window.DrawManager.ProjectionMatrix = Camera.ProjectionMatrix;
-            }
-
-
-            Window.DrawManager.PushMatrix();
-
-            if (Grid != null && Grid.Active)
-            {
-                Grid.BeforeDraw();
-                Transform ();
-            }
-            else
-            {
-                Transform();
-            }
-
-            int i = 0;
-
-            if ((Children != null) && (Children.Count > 0))
-            {
-                SortAllChildren();
-
-                CCNode[] elements = Children.Elements;
-                int count = Children.Count;
-
-                // draw children zOrder < 0
-                for (; i < count; ++i)
+                var elements = Children.Elements;
+                for(int i = 0, N = Children.Count; i < N; ++i)
                 {
-                    if (elements[i].zOrder < 0)
-                    {
-                        // don't break loop on invisible children
-                        if (elements[i].Visible)
-                        {
-                            elements[i].Visit();
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                // self draw
-                Draw();
-                // draw the children
-                for (; i < count; ++i)
-                {
-                    // Draw the z >= 0 order children next.
-                    if (elements[i].Visible)
-                    {
-                        elements[i].Visit();
-                    }
+                    var child = elements[i];
+                    if (child.Visible)
+                        child.Visit(ref worldTransform);
                 }
             }
-            else
-            {
-                // self draw
-                Draw();
-            }
-
-            if (Grid != null && Grid.Active)
-            {
-                Grid.AfterDraw(this);
-                Window.DrawManager.SetIdentityMatrix();
-                Grid.Blit();
-            }
-
-            Window.DrawManager.PopMatrix();
         }
 
-        public void Transform()
+        protected virtual void VisitRenderer(ref CCAffineTransform worldTransform)
         {
-            Window.DrawManager.MultMatrix(ref xnaLocalMatrix);
-        }
-
-        public void TransformAncestors()
-        {
-            if (Parent != null)
-            {
-                Parent.TransformAncestors();
-                Parent.Transform();
-            }
         }
 
 
@@ -2339,6 +2195,25 @@ namespace CocosSharp
             return ActionManager != null ? ActionManager.AddAction(action, this, !IsRunning) : AddLazyAction(action, this, !IsRunning);
         }
 
+        /// <summary>
+        /// Runs an Action so that it can be awaited.
+        /// </summary>
+        /// <param name="action">An instance of a CCFiniteTimeAction object.</param>
+        public Task<CCActionState> RunActionAsync(CCFiniteTimeAction action)
+        {
+
+            Debug.Assert(action != null, "Argument must be non-nil");
+
+            var tcs = new TaskCompletionSource<CCActionState> ();
+
+            CCActionState state = null;
+            var asyncAction = new CCSequence (action, new CCCallFunc (() => tcs.TrySetResult (state)));
+
+            state = ActionManager != null ? ActionManager.AddAction (asyncAction, this, !IsRunning) : AddLazyAction(asyncAction, this, !IsRunning);
+
+            return tcs.Task;
+        }
+
         public CCActionState RunActions(params CCFiniteTimeAction[] actions)
         {
             Debug.Assert(actions != null, "Argument must be non-nil");
@@ -2346,6 +2221,31 @@ namespace CocosSharp
 			var action = actions.Length > 1 ? new CCSequence(actions) : actions[0];
 
             return ActionManager != null ? ActionManager.AddAction (action, this, !IsRunning) : AddLazyAction(action, this, !IsRunning);
+        }
+
+        /// <summary>
+        /// Runs a sequence of Actions so that it can be awaited.
+        /// </summary>
+        /// <param name="actions">An array of CCFiniteTimeAction objects.</param>
+        public Task<CCActionState> RunActionsAsync(params CCFiniteTimeAction[] actions)
+        {
+            Debug.Assert(actions != null, "Argument must be non-nil");
+            Debug.Assert(actions.Length > 0, "Paremeter: actions has length of zero. At least one action must be set to run.");
+
+            var tcs = new TaskCompletionSource<CCActionState> ();
+
+            var numActions = actions.Length;
+            var asyncActions = new CCFiniteTimeAction[actions.Length + 1];
+            Array.Copy (actions, asyncActions, numActions);
+
+            CCActionState state = null;
+            asyncActions [numActions] = new CCCallFunc (() => tcs.TrySetResult (state));
+
+            var asyncAction = asyncActions.Length > 1 ? new CCSequence(asyncActions) : asyncActions[0];
+
+            state = ActionManager != null ? ActionManager.AddAction (asyncAction, this, !IsRunning) : AddLazyAction(asyncAction, this, !IsRunning);
+               
+            return tcs.Task;
         }
 
         public void StopAllActions()
@@ -2495,15 +2395,20 @@ namespace CocosSharp
 
         public void Resume()
         {
-            Scheduler.Resume(this);
-            ActionManager.ResumeTarget(this);
-            EventDispatcher.Resume(this);
+            if (Scheduler != null)
+                Scheduler.Resume(this);
+            if (ActionManager != null)
+                ActionManager.ResumeTarget(this);
+            if (EventDispatcher != null)
+                EventDispatcher.Resume(this);
         }
 
         public void Pause()
         {
-            Scheduler.PauseTarget(this);
-            ActionManager.PauseTarget(this);
+            if (Scheduler != null)
+                Scheduler.PauseTarget(this);
+            if (ActionManager != null)
+                ActionManager.PauseTarget(this);
             if (EventDispatcher != null)
                 EventDispatcher.Pause (this);
         }
@@ -2570,8 +2475,8 @@ namespace CocosSharp
             affineLocalTransform.D = cx * scaleY;
             affineLocalTransform.Tx = x;
             affineLocalTransform.Ty = y;
+            affineLocalTransform.Tz = VertexZ;
 
-            // XXX: Try to inline skew
             // If skew is needed, apply skew and then anchor point
             if (needsSkewMatrix)
             {
@@ -2580,7 +2485,7 @@ namespace CocosSharp
                     (float) Math.Tan(CCMacros.CCDegreesToRadians(skewX)), 1.0f,
                     0.0f, 0.0f);
 
-                affineLocalTransform = CCAffineTransform.Concat(skewMatrix, affineLocalTransform);
+                CCAffineTransform.Concat(ref skewMatrix, ref affineLocalTransform, out affineLocalTransform);
 
                 // adjust anchor point
                 if (!anchorPointInPoints.Equals(CCPoint.Zero))
@@ -2591,11 +2496,7 @@ namespace CocosSharp
                 }
             }
 
-            affineLocalTransform = CCAffineTransform.Concat(additionalTransform, affineLocalTransform);
-
-            // The affine transform is only 2d, so we need to manually incorporate the vertexZ translation
-            XnaLocalMatrix = affineLocalTransform.XnaMatrix;
-            xnaLocalMatrix.M43 = VertexZ;
+            CCAffineTransform.Concat(ref additionalTransform, ref affineLocalTransform, out affineLocalTransform);
 
             Matrix fauxLocalCameraTransform = Matrix.Identity;
 
@@ -2605,12 +2506,12 @@ namespace CocosSharp
                     new Vector3(FauxLocalCameraCenter.X, FauxLocalCameraCenter.Y, FauxLocalCameraCenter.Z),
                     new Vector3(FauxLocalCameraTarget.X, FauxLocalCameraTarget.Y, FauxLocalCameraTarget.Z),
                     new Vector3(FauxLocalCameraUpDirection.X, FauxLocalCameraUpDirection.Y, FauxLocalCameraUpDirection.Z));
-                fauxLocalCameraTransform *= Matrix.CreateTranslation(new Vector3 (AnchorPointInPoints.X, AnchorPointInPoints.Y, 0));
+                fauxLocalCameraTransform.M41 += AnchorPointInPoints.X;
+                fauxLocalCameraTransform.M42 += AnchorPointInPoints.Y;
             }
 
-            XnaLocalMatrix = fauxLocalCameraTransform * xnaLocalMatrix;
-
-            affineLocalTransform = CCAffineTransform.Concat(new CCAffineTransform(fauxLocalCameraTransform), affineLocalTransform);
+            var affineCameraTrans = new CCAffineTransform(fauxLocalCameraTransform);
+            CCAffineTransform.Concat(ref affineCameraTrans, ref affineLocalTransform, out affineLocalTransform);
 
             if (Children != null)
             {
@@ -2619,6 +2520,8 @@ namespace CocosSharp
                     child.ParentUpdatedTransform();
                 }
             }
+
+            transformIsDirty = false;
         }
 
         #endregion Transformations

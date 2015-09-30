@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -12,6 +13,19 @@ namespace CocosSharp
 {
     public partial class CCLabel
     {
+        private struct KerningInfo
+        {
+            /// <summary>Specifies the A spacing of the character. The A spacing is the distance to add to the current
+            /// position before drawing the character glyph.</summary>
+            public float A;
+            /// <summary>Specifies the B spacing of the character. The B spacing is the width of the drawn portion of
+            /// the character glyph.</summary>
+            public float B;
+            /// <summary>Specifies the C spacing of the character. The C spacing is the distance to add to the current
+            /// position to provide white space to the right of the character glyph.</summary>
+            public float C;
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         private struct ABCFloat
         {
@@ -35,7 +49,7 @@ namespace CocosSharp
         private static Brush _brush;
         private static Dictionary<char, KerningInfo> _abcValues = new Dictionary<char, KerningInfo>();
         private static Dictionary<string, FontFamily> _fontFamilyCache = new Dictionary<string, FontFamily>();
-        private static PrivateFontCollection _loadedFonts = new PrivateFontCollection();
+        private static PrivateFontCollection loadedFontsCollection = new PrivateFontCollection();
 
         [DllImport("gdi32.dll", SetLastError = true)]
         static extern IntPtr CreateCompatibleDC(IntPtr hdc);
@@ -77,9 +91,9 @@ namespace CocosSharp
                     {
                         try
                         {
-                            _loadedFonts.AddFontFile(fontPath);
+                            loadedFontsCollection.AddFontFile(fontPath);
 
-                            fontFamily = _loadedFonts.Families[_loadedFonts.Families.Length - 1];
+                            fontFamily = loadedFontsCollection.Families[loadedFontsCollection.Families.Length - 1];
 
                             _currentFont = new Font(fontFamily, fontSize);
                         }
@@ -159,7 +173,7 @@ namespace CocosSharp
 
                 _graphics = Graphics.FromImage(_bitmap);
 
-                _graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                _graphics.SmoothingMode = SmoothingMode.HighQuality;
                 _graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 _graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
                 //graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
@@ -206,5 +220,236 @@ namespace CocosSharp
 
             return (byte*)_bitmapData.Scan0.ToPointer();
         }
+
+        private Font CreateFont(string fontName, float fontSize)
+        {
+
+            Font currentFont;
+
+            if (_defaultFont == null)
+            {
+                _defaultFont = new Font(FontFamily.GenericSansSerif, 12);
+            }
+
+            FontFamily fontFamily;
+
+            if (!_fontFamilyCache.TryGetValue(fontName, out fontFamily))
+            {
+                var ext = Path.GetExtension(fontName);
+
+                currentFont = _defaultFont;
+
+                if (!String.IsNullOrEmpty(ext) && ext.ToLower() == ".ttf")
+                {
+
+                    try
+                    {
+
+                        // Read the font file bytes
+                        var fontBytes = CCContentManager.SharedContentManager.GetAssetStreamAsBytes(fontName);
+
+                        // Pin the font data for the length of the read file
+                        var fontData = Marshal.AllocCoTaskMem(fontBytes.Length);
+
+                        // Copy the font data to our memory
+                        Marshal.Copy(fontBytes, 0, fontData, fontBytes.Length);
+
+                        // Add the memory data to our private font collection as a Font in Memory
+                        loadedFontsCollection.AddMemoryFont(fontData, fontBytes.Length);
+
+                        // Release the pinned data
+                        Marshal.FreeCoTaskMem(fontData);
+
+                        // Try to get the family name of the 
+                        var ttfFontFamily = CCLabelUtilities.GetFontFamily(fontBytes, 0);
+
+                        fontFamily = new FontFamily(ttfFontFamily, loadedFontsCollection);
+
+                        currentFont = new Font(fontFamily, fontSize);
+                    }
+                    catch
+                    {
+                        currentFont = _defaultFont;
+                    }
+                }
+                else
+                {
+                    currentFont = new Font(fontName, fontSize);
+                }
+
+                _fontFamilyCache.Add(fontName, currentFont.FontFamily);
+            }
+            else
+            {
+                currentFont = new Font(fontFamily, fontSize);
+            }
+
+            // Create a small bitmap to be used for our graphics context
+            CreateBitmap(1, 1);
+
+            return currentFont;
+        }
+
+        static float dpiScale = 96f / 72f;  // default but will be recalculated below
+#if WINDOWSGL
+        internal CCTexture2D CreateTextSprite(string text, CCFontDefinition textDefinition)
+        {
+
+            if (string.IsNullOrEmpty(text))
+                return new CCTexture2D();
+
+            int imageWidth;
+            int imageHeight;
+            var textDef = textDefinition;
+            var contentScaleFactorWidth = CCLabel.DefaultTexelToContentSizeRatios.Width;
+            var contentScaleFactorHeight = CCLabel.DefaultTexelToContentSizeRatios.Height;
+            textDef.FontSize *= contentScaleFactorWidth;
+            textDef.Dimensions.Width *= contentScaleFactorWidth;
+            textDef.Dimensions.Height *= contentScaleFactorHeight;
+
+            bool hasPremultipliedAlpha;
+
+            var font = CreateFont(textDef.FontName, textDef.FontSize / dpiScale);
+
+            // color
+            var foregroundColor = System.Drawing.Color.White;
+
+            // alignment
+            var horizontalAlignment = textDef.Alignment;
+            var verticleAlignement = textDef.LineAlignment;
+
+            var textAlign = (CCTextAlignment.Right == horizontalAlignment) ? StringAlignment.Far
+                : (CCTextAlignment.Center == horizontalAlignment) ? StringAlignment.Center
+                : StringAlignment.Near;
+
+            var paragraphAlign = (CCVerticalTextAlignment.Bottom == verticleAlignement) ? StringAlignment.Far
+                : (CCVerticalTextAlignment.Center == verticleAlignement) ? StringAlignment.Center
+                : StringAlignment.Near;
+
+            // LineBreak
+            var lineBreak = (CCLabelLineBreak.Character == textDef.LineBreak) ? StringTrimming.Character
+                : (CCLabelLineBreak.Word == textDef.LineBreak) ? StringTrimming.Word
+                : StringTrimming.None;
+
+            var dimensions = new SizeF(textDef.Dimensions.Width, textDef.Dimensions.Height);
+
+            var layoutAvailable = true;
+            if (dimensions.Width <= 0)
+            {
+                dimensions.Width = 8388608;
+                layoutAvailable = false;
+            }
+
+            if (dimensions.Height <= 0)
+            {
+                dimensions.Height = 8388608;
+                layoutAvailable = false;
+            }
+
+            var stringFormat = StringFormat.GenericDefault;
+
+            // We will set the Alignment to Near to begin with because of a calculation error of MeasureString
+            // with a line of text with embedded newline '\n' characters after a number and Alignment = Center.
+            // Example:  "Alignment 1\nnew line"
+            stringFormat.Alignment = StringAlignment.Near;
+            stringFormat.LineAlignment = paragraphAlign;
+            stringFormat.Trimming = lineBreak;
+
+            int charactersFitted = 0;
+            int lineCount = 0;
+
+            var boundingRect = RectangleF.Empty;
+
+            var textMetrics = _graphics.MeasureString(text, font, dimensions, stringFormat,
+                out charactersFitted, out lineCount);
+
+            // early out if something went wrong somewhere and nothing is to be drawn
+            if (lineCount == 0)
+                return new CCTexture2D();
+
+            // We will set the real Alignement here before drawing the text - See comment above about calculation error
+            // with Alignment.
+            stringFormat.Alignment = textAlign;
+
+            // Fill out the bounding rect width and height so we can calculate the yOffset later if needed
+            boundingRect.X = 0;
+            boundingRect.Y = 0;
+            boundingRect.Width = textMetrics.Width;
+            boundingRect.Height = textMetrics.Height;
+
+            if (!layoutAvailable)
+            {
+                if (dimensions.Width == 8388608)
+                {
+                    dimensions.Width = boundingRect.Width;
+                }
+                if (dimensions.Height == 8388608)
+                {
+                    dimensions.Height = boundingRect.Height;
+                }
+            }
+
+            imageWidth = (int)dimensions.Width;
+            imageHeight = (int)dimensions.Height;
+
+            CreateBitmap(imageWidth, imageHeight);
+
+            if (textDefinition.isShouldAntialias)
+                _graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
+
+            var _brush = new SolidBrush(foregroundColor);
+            _graphics.Clear(System.Drawing.Color.Transparent);
+            _graphics.DrawString(text, font, _brush, new RectangleF(PointF.Empty, dimensions), stringFormat);
+            _graphics.Flush();
+
+            try
+            {
+                _bitmap = (Bitmap)_bitmap.RGBToBGR();
+                var data = new byte[_bitmap.Width * _bitmap.Height * 4];
+
+                BitmapData bitmapData = _bitmap.LockBits(new System.Drawing.Rectangle(0, 0, _bitmap.Width, _bitmap.Height),
+                    ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                if (bitmapData.Stride != _bitmap.Width * 4)
+                    throw new NotImplementedException();
+                Marshal.Copy(bitmapData.Scan0, data, 0, data.Length);
+                _bitmap.UnlockBits(bitmapData);
+
+                Texture2D texture = null;
+                texture = new Texture2D(CCDrawManager.SharedDrawManager.XnaGraphicsDevice, _bitmap.Width, _bitmap.Height);
+                texture.SetData(data);
+
+                return new CCTexture2D(texture);
+            }
+            catch (Exception ie)
+            {
+                CCLog.Log("CCLabel: internal error creating texture sprite: {0}\n{1}", ie.Message, ie.StackTrace);
+            }
+            finally
+            {
+                if (_bitmap != null)
+                {
+                    _bitmap.Dispose();
+                    _bitmap = null;
+                }
+                if (_graphics != null)
+                {
+                    _graphics.Dispose();
+                    _graphics = null;
+                }
+                if (_brush != null)
+                    _brush.Dispose();
+            }
+
+            return new CCTexture2D();
+        }
+
+#endif
+
+#if XNA 
+        internal CCTexture2D CreateTextSprite(string text, CCFontDefinition textDefinition)
+        {
+            return new CCTexture2D();
+        }
+#endif
     }
 }

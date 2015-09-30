@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace CocosSharp
 {
@@ -23,6 +23,10 @@ namespace CocosSharp
         const string TilesetElementTexelHeight = "tileheight";
 
         const string TileElementId = "id";
+        const string TileElementGidAndFlags = "gid";
+
+        const string TileAnimKeyFrameGid = "tileid";
+        const string TileAnimKeyFrameDuration = "duration";
 
         const string LayerElementName = "name";
         const string LayerElementNumOfColumns = "width";
@@ -41,6 +45,7 @@ namespace CocosSharp
         const string DataElementEncoding = "encoding";
         const string DataElementCompression = "compression";
         const string DataElementBase64 = "base64";
+        const string DataElementCsv = "csv";
         const string DataElementGzip = "gzip";
         const string DataElementZlib = "zlib";
 
@@ -51,6 +56,12 @@ namespace CocosSharp
         const string ObjectElementGid = "gid";
         const string ObjectElementXPosition = "x";
         const string ObjectElementYPosition = "y";
+	    const string ObjectElementPoints = "points";
+	    const string ObjectElementShape = "shape";
+	    const string ObjectElementShapeEllipse = "ellipse";
+	    const string ObjectElementShapePolygon = "polygon";
+	    const string ObjectElementShapePolyline = "polyline";
+
 
         const string PropertyElementName = "name";
         const string PropertyElementValue = "value";
@@ -67,8 +78,10 @@ namespace CocosSharp
 
         CCTileMapProperty currentParentElement;
         short currentFirstGID;
+        uint currentXmlTileIndex;
         byte[] currentString;
         Dictionary<string,string> currentAttributeDict;
+        List<CCTileAnimationKeyFrame> currentTileAnimationKeyFrames;
 
 
         #region Properties
@@ -85,6 +98,7 @@ namespace CocosSharp
         internal List<CCTileMapObjectGroup> ObjectGroups { get; private set; }
         internal Dictionary<string, string> MapProperties { get; private set; }
         internal Dictionary<short, Dictionary<string, string>> TileProperties { get; private set; }
+        internal Dictionary<short, List<CCTileAnimationKeyFrame>> TileAnimations { get; private set; }
 
         #endregion Properties
 
@@ -111,7 +125,12 @@ namespace CocosSharp
         public CCTileMapInfo(StreamReader stream) : this()
         {
             string data = stream.ReadToEnd();
-            new CCSAXParser().ParseContent(data);
+
+            var parser = new CCSAXParser();
+
+            parser.SetDelegator(this);
+
+            parser.ParseContent(data);
         }
 
         CCTileMapInfo()
@@ -121,6 +140,7 @@ namespace CocosSharp
             ObjectGroups = new List<CCTileMapObjectGroup>(4);
             MapProperties = new Dictionary<string, string>();
             TileProperties = new Dictionary<short, Dictionary<string, string>>();
+            TileAnimations = new Dictionary<short, List<CCTileAnimationKeyFrame>>();
             tileDataCompressionType = CCTileDataCompressionType.None;
             currentParentElement = CCTileMapProperty.None;
             currentFirstGID = 0;
@@ -131,6 +151,8 @@ namespace CocosSharp
                 { "map", Tuple.Create<Action,Action>(ParseMapElement, ParseMapEndElement) },
                 { "tileset", Tuple.Create<Action,Action>(ParseTilesetElement, ParseTilesetEndElement) },
                 { "tile", Tuple.Create<Action,Action>(ParseTileElement, ParseTileEndElement) },
+                { "animation", Tuple.Create<Action,Action>(ParseTileAnimationElement, ParseTileAnimationEndElement) },
+                { "frame", Tuple.Create<Action,Action>(ParseTileAnimationKeyFrameElement, ParseTileAnimationKeyFrameEndElement) },
                 { "layer", Tuple.Create<Action,Action>(ParseLayerElement, ParseLayerEndElement) },
                 { "objectgroup", Tuple.Create<Action,Action>(ParseObjectGroupElement, ParseObjectGroupEndElement) },
                 { "image", Tuple.Create<Action,Action>(ParseImageElement, ParseImageEndElement) },
@@ -138,7 +160,8 @@ namespace CocosSharp
                 { "object", Tuple.Create<Action,Action>(ParseObjectElement, ParseObjectEndElement) },
                 { "property", Tuple.Create<Action,Action>(ParsePropertyElement, ParsePropertyEndElement) },
                 { "polygon", Tuple.Create<Action,Action>(ParsePolygonElement, ParsePolygonEndElement) },
-                { "polyline", Tuple.Create<Action,Action>(ParsePolylineElement, ParsePolylineEndElement) }
+                { "polyline", Tuple.Create<Action,Action>(ParsePolylineElement, ParsePolylineEndElement) },
+                { "ellipse", Tuple.Create<Action,Action>(ParseEllipseElement, ParseEllipseEndElement) },
             };
         }
 
@@ -297,15 +320,52 @@ namespace CocosSharp
 
         void ParseTileElement()
         {
-            int tilesetCount = Tilesets != null ? Tilesets.Count : 0;
-            CCTileSetInfo info = tilesetCount > 0 ? Tilesets[tilesetCount - 1] : null;
+            if (currentParentElement == CCTileMapProperty.Layer)
+            {
+                int layersCount = Layers != null ? Layers.Count : 0;
+                CCTileLayerInfo layer = layersCount > 0 ? Layers[layersCount - 1] : null;
 
-            var dict = new Dictionary<string, string>();
+                uint gidAndFlags = uint.Parse(currentAttributeDict[TileElementGidAndFlags]);
 
-            ParentGID = (short)(info.FirstGid + short.Parse(currentAttributeDict[TileElementId]));
-            TileProperties.Add(ParentGID, dict);
+                if (currentXmlTileIndex < layer.NumberOfTiles)
+                    layer.TileGIDAndFlags[currentXmlTileIndex++] = CCTileMapFileEncodedTileFlags.DecodeGidAndFlags(gidAndFlags);
+            }
+            else
+            {
+                int tilesetCount = Tilesets != null ? Tilesets.Count : 0;
+                CCTileSetInfo info = tilesetCount > 0 ? Tilesets[tilesetCount - 1] : null;
 
-            currentParentElement = CCTileMapProperty.Tile;
+                var dict = new Dictionary<string, string>();
+
+                ParentGID = (short)(info.FirstGid + short.Parse(currentAttributeDict[TileElementId]));
+                TileProperties.Add(ParentGID, dict);
+                currentParentElement = CCTileMapProperty.Tile;
+            }
+
+        }
+
+        void ParseTileAnimationElement()
+        {
+            if(currentParentElement == CCTileMapProperty.Tile) 
+            {
+                currentParentElement = CCTileMapProperty.TileAnimation;
+                currentTileAnimationKeyFrames = new List<CCTileAnimationKeyFrame>();
+            }
+        }
+
+        void ParseTileAnimationKeyFrameElement()
+        {
+            if(currentParentElement == CCTileMapProperty.TileAnimation && currentTileAnimationKeyFrames != null) 
+            {
+                int tilesetCount = Tilesets != null ? Tilesets.Count : 0;
+                CCTileSetInfo info = tilesetCount > 0 ? Tilesets[tilesetCount - 1] : null;
+
+                short frameGid = (short)(info.FirstGid + short.Parse(currentAttributeDict[TileAnimKeyFrameGid]));
+                short frameDuration = short.Parse(currentAttributeDict [TileAnimKeyFrameDuration]);
+
+                if(frameGid >= 0 && frameDuration > 0)
+                    currentTileAnimationKeyFrames.Add (new CCTileAnimationKeyFrame(frameGid, frameDuration));
+            }
         }
 
         void ParseLayerElement()
@@ -378,8 +438,10 @@ namespace CocosSharp
             tileset.TilesheetFilename = imagename;
 
             var directory = string.Empty;
-            if (!CCFileUtils.GetDirectoryName(imagename, out directory))
-                tileset.TilesheetFilename = CCFileUtils.FullPathFromRelativeFile(imagename, TileMapFileName);
+            if (string.IsNullOrEmpty (TileMapFileName))
+                tileset.TilesheetFilename = imagename;
+            else
+                tileset.TilesheetFilename = CCFileUtils.FullPathFromRelativeFile (imagename, TileMapFileName);
         }
 
         void ParseDataElement()
@@ -389,32 +451,36 @@ namespace CocosSharp
             string compression = currentAttributeDict.ContainsKey(DataElementCompression) 
                 ? currentAttributeDict[DataElementCompression] : String.Empty;
 
-            if (encoding == DataElementBase64)
+            if (encoding == DataElementBase64) 
             {
                 tileDataCompressionType = tileDataCompressionType | CCTileDataCompressionType.Base64;
                 storingCharacters = true;
 
-                if (compression == DataElementGzip)
-                {
+                if (compression == DataElementGzip) {
                     tileDataCompressionType = tileDataCompressionType | CCTileDataCompressionType.Gzip;
-                }
-                else if (compression == DataElementZlib)
-                {
+                } else if (compression == DataElementZlib) {
                     tileDataCompressionType = tileDataCompressionType | CCTileDataCompressionType.Zlib;
+                } else if (compression != String.Empty) {
+                    throw new NotImplementedException (
+                        String.Format ("CCTileMapInfo: ParseDataElement: Unsupported compression method {0}", compression));
                 }
-
-                Debug.Assert(compression == String.Empty || compression == DataElementGzip || compression == DataElementZlib, 
-                    String.Format("CCTileMapInfo: ParseDataElement: Unsupported compression method {0}", compression));
+            } 
+            else if (encoding == DataElementCsv) 
+            {
+                tileDataCompressionType = CCTileDataCompressionType.Csv;
+                storingCharacters = true;
             }
 
-            Debug.Assert(tileDataCompressionType != CCTileDataCompressionType.None,
-                "CTileMapInfo: ParseDataElement: Only base64 and/or gzip/zlib maps are supported");
+            else if(encoding != String.Empty)
+                throw new NotImplementedException("CTileMapInfo: ParseDataElement: Only base64 encoded maps are supported");
         }
 
         void ParseObjectElement()
         {
-            int objectGroupCount = ObjectGroups != null ? ObjectGroups.Count : 0;
-            CCTileMapObjectGroup objectGroup = objectGroupCount > 0 ? ObjectGroups[objectGroupCount - 1] : null;
+	        if (ObjectGroups == null || ObjectGroups.Count == 0)
+		        return;
+
+            CCTileMapObjectGroup objectGroup = ObjectGroups[ObjectGroups.Count - 1];
 
             // The value for "type" was blank or not a valid class name
             // Create an instance of TMXObjectInfo to store the object and its properties
@@ -422,24 +488,23 @@ namespace CocosSharp
 
             var array = new[] { ObjectElementName, ObjectElementType, ObjectElementWidth, ObjectElementHeight, ObjectElementGid};
 
-            for (int i = 0; i < array.Length; i++)
+            foreach (string key in array)
             {
-                string key = array[i];
-                if (currentAttributeDict.ContainsKey(key))
-                {
-                    dict.Add(key, currentAttributeDict[key]);
-                }
+	            if (currentAttributeDict.ContainsKey(key))
+	            {
+		            dict.Add(key, currentAttributeDict[key]);
+	            }
             }
 
-            int x = int.Parse(currentAttributeDict[ObjectElementXPosition]) + (int) objectGroup.PositionOffset.X;
-            dict.Add(ObjectElementXPosition, x.ToString());
-
-            int y = int.Parse(currentAttributeDict[ObjectElementYPosition]) + (int) objectGroup.PositionOffset.Y;
+            float x = float.Parse(currentAttributeDict[ObjectElementXPosition]) + objectGroup.PositionOffset.X;
+            float y = float.Parse(currentAttributeDict[ObjectElementYPosition]) + objectGroup.PositionOffset.Y;
 
             // Correct y position. Tiled uses inverted y-coordinate system where top is y=0
-            y = (int) (MapDimensions.Row * TileTexelSize.Height) - y -
-                (currentAttributeDict.ContainsKey(ObjectElementHeight) ? int.Parse(currentAttributeDict[ObjectElementHeight]) : 0);
-            dict.Add(ObjectElementYPosition, y.ToString());
+            y = (MapDimensions.Row * TileTexelSize.Height) - y -
+                (currentAttributeDict.ContainsKey(ObjectElementHeight) ? float.Parse(currentAttributeDict[ObjectElementHeight]) : 0);
+
+            dict.Add(ObjectElementXPosition, ToFloatString(x));
+            dict.Add(ObjectElementYPosition, ToFloatString(y));
 
             objectGroup.Objects.Add(dict);
 
@@ -504,45 +569,97 @@ namespace CocosSharp
 
         void ParsePolygonElement()
         {
-            // find parent object's dict and add polygon-points to it
-            int objGroupsCount = ObjectGroups != null ? ObjectGroups.Count : 0;
-            CCTileMapObjectGroup objectGroup = objGroupsCount > 0 ? ObjectGroups[objGroupsCount - 1] : null;
-
-            List<Dictionary<string, string>> objects = objectGroup.Objects;
-            int objCount = objects != null ? objects.Count : 0;
-            Dictionary<string, string> dict = objCount > 0 ? objects[objCount -1] : null;
-
-            // get points value string
-            var value = currentAttributeDict["points"];
-            if (!String.IsNullOrEmpty(value))
-            {
-                var pointsArray = new List<CCPoint>();
-                var pointPairs = value.Split(' ');
-
-                foreach (var pontPair in pointPairs)
-                {
-                    //TODO: Parse points
-                    //CCPoint point;
-                    //point.X = x + objectGroup.PositionOffset.X;
-                    //point.Y = y + objectGroup.PositionOffset.Y;
-
-                    //pPointsArray.Add(point);
-                }
-
-                //dict.Add("points", pPointsArray);
-            }
+			ParseMultilineShape(ObjectElementShapePolygon);
         }
 
         void ParsePolylineElement()
         {
-            // find parent object's dict and add polyline-points to it
-            // CCTMXObjectGroup* objectGroup = (CCTMXObjectGroup*)ObjectGroups->lastObject();
-            // CCDictionary* dict = (CCDictionary*)objectGroup->getObjects()->lastObject();
-            // TODO: dict->setObject:[currentAttributeDict objectForKey:@"points"] forKey:@"polylinePoints"];
+			ParseMultilineShape(ObjectElementShapePolyline);
         }
 
-        #endregion Parse begin element methods
+	    void ParseMultilineShape(string shapeName)
+	    {
+            // Find parent object's dict and add points to it. If at any time we don't find the objects we are expecting 
+			// based on the state of the parser, just return without doing anything instead of crashing.
+ 	        if (ObjectGroups == null || ObjectGroups.Count == 0)
+		        return;
 
+            CCTileMapObjectGroup objectGroup = ObjectGroups[ObjectGroups.Count - 1];
+	        if (objectGroup == null || objectGroup.Objects.Count == 0)
+		        return;
+
+	        var dict = objectGroup.Objects[objectGroup.Objects.Count - 1];
+	        if (!currentAttributeDict.ContainsKey(ObjectElementPoints))
+		        return;
+
+            string value = currentAttributeDict[ObjectElementPoints];
+	        if (String.IsNullOrWhiteSpace(value))
+		        return;
+
+		    if (!dict.ContainsKey(ObjectElementXPosition) || !dict.ContainsKey(ObjectElementYPosition))
+			    return;
+
+		    float objectXOffset = float.Parse(dict[ObjectElementXPosition]);
+		    float objectYOffset = float.Parse(dict[ObjectElementYPosition]);
+
+	        string[] pointPairs = value.Split(' ');
+	        var points = new CCPoint[pointPairs.Length];
+
+	        var sb = new StringBuilder();
+	        for (int i = 0; i < pointPairs.Length; i++)
+	        {
+		        string pointPair = pointPairs[i];
+		        string[] pointCoords = pointPair.Split(',');
+		        if (pointCoords.Length != 2)
+			        return;
+
+				// Adjust the offsets relative to the parent object. When adjusting the coordinates,
+				// correct y position. Tiled uses inverted y-coordinate system where top is y=0.
+				// We have to invert the y coordinate to make it move in the correct direction relative to the parent.
+		        points[i].X = float.Parse(pointCoords[0]) + objectXOffset;
+		        points[i].Y = float.Parse(pointCoords[1]) * -1 + objectYOffset;
+
+		        sb.Append(ToFloatString(points[i].X));
+		        sb.Append(",");
+		        sb.Append(ToFloatString(points[i].Y));
+		        sb.Append(" ");
+	        }
+
+			// Strip the trailing space
+			string pointsString = sb.Length > 0 ? sb.ToString(0, sb.Length - 1) : null;
+            dict.Add(ObjectElementPoints, pointsString);
+
+			dict[ObjectElementShape] = shapeName;
+	    }
+
+	    void ParseEllipseElement()
+	    {
+ 	        if (ObjectGroups == null || ObjectGroups.Count == 0)
+		        return;
+
+            CCTileMapObjectGroup objectGroup = ObjectGroups[ObjectGroups.Count - 1];
+	        if (objectGroup == null || objectGroup.Objects.Count == 0)
+		        return;
+
+	        var dict = objectGroup.Objects[objectGroup.Objects.Count - 1];
+			dict[ObjectElementShape] = ObjectElementShapeEllipse;
+	    }
+
+	    string ToFloatString(float f)
+	    {
+            double floorF = Math.Floor(f);
+
+            // Different numeric dict values can be either int or float depending on context
+            // When we call Parse.int(str), we need to format of the string to include no decimals
+            // or else a bad format exception is thrown
+
+            if (f == floorF)
+                return ((int)f).ToString();
+            else
+                return f.ToString();
+	    }
+
+        #endregion Parse begin element methods
 
         #region Parse end element methods
 
@@ -552,6 +669,23 @@ namespace CocosSharp
         }
 
         void ParseTileEndElement()
+        {
+        }
+
+        void ParseTileAnimationEndElement()
+        {
+            if(currentParentElement == CCTileMapProperty.TileAnimation) 
+            {
+                if(currentTileAnimationKeyFrames != null && currentTileAnimationKeyFrames.Count > 0)
+                    TileAnimations.Add(ParentGID, currentTileAnimationKeyFrames);
+
+                currentTileAnimationKeyFrames = null;
+            }
+
+            currentParentElement = CCTileMapProperty.Tile;
+        }
+
+        void ParseTileAnimationKeyFrameEndElement()
         {
         }
 
@@ -609,19 +743,48 @@ namespace CocosSharp
                     encoded = currentString;
                 }
 
+                // encoded could be null because the compressed data could not be decompressed
+                if (encoded != null)
+                {
+                    for (int i = 0; i < layer.TileGIDAndFlags.Length; i++)
+                    {
+                        int i4 = i * 4;
+
+                        uint gidAndFlags = (uint)(
+                            (uint)encoded[i4] |
+                            (uint)encoded[(int)(i4 + 1)] << 8 |
+                            (uint)encoded[(int)(i4 + 2)] << 16 |
+                            (uint)encoded[(int)(i4 + 3)] << 24);
+
+
+                        layer.TileGIDAndFlags[i] = CCTileMapFileEncodedTileFlags.DecodeGidAndFlags(gidAndFlags);
+                    }
+                }
+
+                currentString = null;
+            }
+            else if(tileDataCompressionType == CCTileDataCompressionType.Csv)
+            {
+                storingCharacters = false;
+
+                int layersCount = Layers != null ? Layers.Count : 0;
+                CCTileLayerInfo layer = layersCount > 0 ? Layers[layersCount - 1] : null;
+
+                var str = System.Text.Encoding.UTF8.GetString(currentString, 0, currentString.Length).Split(',');
+
                 for (int i = 0; i < layer.TileGIDAndFlags.Length; i++)
                 {
-                    int i4 = i * 4;
-                    uint gidAndFlags = (uint) (
-                        encoded[i4] |
-                        encoded[i4 + 1] << 8 |
-                        encoded[i4 + 2] << 16 |
-                        encoded[i4 + 3] << 24);
-
+                    uint gidAndFlags = uint.Parse(str[i]);
                     layer.TileGIDAndFlags[i] = CCTileMapFileEncodedTileFlags.DecodeGidAndFlags(gidAndFlags);
                 }
 
                 currentString = null;
+            }
+
+
+            else if((tileDataCompressionType & CCTileDataCompressionType.None) != 0)
+            {
+                currentXmlTileIndex = 0;
             }
         }
 
@@ -642,6 +805,11 @@ namespace CocosSharp
         {
         }
 
+	    void ParseEllipseEndElement()
+	    {
+	    }
+
         #endregion Parse end element methods
     }
 }
+

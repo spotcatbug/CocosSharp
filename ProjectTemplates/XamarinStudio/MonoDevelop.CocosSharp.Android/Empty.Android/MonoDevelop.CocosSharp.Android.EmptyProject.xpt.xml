@@ -1,10 +1,13 @@
 <?xml version="1.0"?>
 <Template>
     <TemplateConfiguration>
-        <_Name>CocosSharp empty game</_Name>
-        <_Category>C#/Android</_Category>
+        <_Name>CocosSharp Game</_Name>
+        <Category>android/app/general</Category>
         <Icon>monodroid-project</Icon>
+        <Image id="md-android-app" />
         <LanguageName>C#</LanguageName>
+        <Wizard>MonoDevelop.MonoDroid.ProjectTemplateWizard</Wizard>
+        <SupportedParameters>AppName,AppIdentifier</SupportedParameters>
         <_Description>An empty CocosSharp project for Android.</_Description>
     </TemplateConfiguration>
     
@@ -63,7 +66,7 @@
             </Files>
 
             <Packages>
-                <Package id="CocosSharp.Android" />
+                <Package id="CocosSharp.PCL.Shared" />
             </Packages>
         </Project>
     </Combine>

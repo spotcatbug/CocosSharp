@@ -93,8 +93,9 @@ namespace CocosSharp
             get {
                 if (hasInfiniteAction && actionSequences [last] is CCRepeatForever)
                 {
-                    return (false);
+                    return false;
                 }
+
                 return base.IsDone;
             }
         }
@@ -107,11 +108,12 @@ namespace CocosSharp
             {
                 actionStates [last].Stop ();
             }
+            base.Stop();
         }
 
         protected internal override void Step (float dt)
         {
-            if (last > -1 && (actionSequences [last] is CCRepeat || actionSequences [last] is CCRepeatForever))
+            if (last > -1 && (actionSequences [last] is CCRepeatForever))
             {
                 actionStates [last].Step (dt);
             }
@@ -123,7 +125,6 @@ namespace CocosSharp
 
         public override void Update (float time)
         {
-            bool bRestart = false;
             int found;
             float new_t;
 
@@ -180,7 +181,7 @@ namespace CocosSharp
 
 
             // Last action found and it is done
-            if (found != last || bRestart)
+            if (found != last)
             {
                 actionStates [found] = (CCFiniteTimeActionState)actionSequences [found].StartAction (Target);
             }

@@ -9,86 +9,40 @@ using Microsoft.Xna.Framework;
 namespace tests
 {
 
-
-	public enum EventDispatchTests
-	{
-		TOUCHABLE_SPRITE_TEST = 0,
-		FIXED_PRIORITY_TEST,
-		EVENT_MOUSE,
-		TEST_LABEL_KEYBOARD,
-		TEST_ACCELEROMETER,
-		TEST_CUSTOM_EVENT,
-		TEST_REMOVE_RETAIN_NODE,
-		TEST_REMOVE_AFTER_ADDING,
-		TEST_DIRECTOR,
-		TEST_GLOBAL_Z_TOUCH,
-		TEST_PAUSE_RESUME,
-		TEST_REMOVE_ALL,
-		TEST_SMOOTH_FOLLOW,
-		TEST_STOP_PROPAGATION,
-		TEST_CASE_COUNT
-	};
-
 	// the class inherit from TestScene
 	// every Scene each test used must inherit from TestScene,
 	// make sure the test have the menu item for back to main menu
 	public class EventDispatcherTestScene : TestScene
 	{
 		public static int sceneIndex = -1;
+        public static int MaxTests;
+
+        public EventDispatcherTestScene()
+        {
+            MaxTests = eventDispatcherTestFunctions.Count;
+        }
+
+        static List<Func<CCLayer>> eventDispatcherTestFunctions = new List<Func<CCLayer>> ()
+            {
+                () => new TouchableSpriteTest(),
+                () => new FixedPriorityTest(),
+                () => new MouseEventTest(),
+                () => new LabelKeyboardEventTest(),
+                () => new SpriteAccelerationEventTest(),
+                () => new CustomEventTest(),
+                () => new RemoveAndRetainNodeTest(),
+                () => new RemoveListenerAfterAddingTest(),
+                () => new DirectorTest(),
+                () => new GlobalZTouchTest(),
+                () => new PauseResumeTest(),
+                () => new RemoveAllTest(),
+                () => new SmoothFollowTest(),
+                () => new StopPropagationTest(),
+            };
 
 		public static CCLayer CreateLayer(int index)
 		{
-			CCLayer testLayer = null;
-
-			switch (index)
-			{
-			case (int) EventDispatchTests.TOUCHABLE_SPRITE_TEST:
-				testLayer = new TouchableSpriteTest();
-				break;
-			case (int) EventDispatchTests.FIXED_PRIORITY_TEST:
-				testLayer = new FixedPriorityTest();
-				break;
-			case (int) EventDispatchTests.EVENT_MOUSE:
-				testLayer = new MouseEventTest();
-				break;
-			case (int) EventDispatchTests.TEST_LABEL_KEYBOARD:
-				testLayer = new LabelKeyboardEventTest();
-				break;
-			case (int) EventDispatchTests.TEST_ACCELEROMETER:
-				testLayer = new SpriteAccelerationEventTest();
-				break;
-			case (int) EventDispatchTests.TEST_CUSTOM_EVENT:
-				testLayer = new CustomEventTest();
-				break;
-			case (int) EventDispatchTests.TEST_REMOVE_RETAIN_NODE:
-				testLayer = new RemoveAndRetainNodeTest();
-				break;
-			case (int) EventDispatchTests.TEST_REMOVE_AFTER_ADDING:
-				testLayer = new RemoveListenerAfterAddingTest();
-				break;
-			case (int) EventDispatchTests.TEST_DIRECTOR:
-				testLayer = new DirectorTest();
-				break;
-			case (int) EventDispatchTests.TEST_GLOBAL_Z_TOUCH:
-				testLayer = new GlobalZTouchTest();
-				break;
-			case (int) EventDispatchTests.TEST_PAUSE_RESUME:
-				testLayer = new PauseResumeTest();
-				break;
-			case (int) EventDispatchTests.TEST_REMOVE_ALL:
-				testLayer = new RemoveAllTest();
-				break;
-			case (int) EventDispatchTests.TEST_SMOOTH_FOLLOW:
-				testLayer = new SmoothFollowTest();
-				break;
-			case (int) EventDispatchTests.TEST_STOP_PROPAGATION:
-				testLayer = new StopPropagationTest();
-				break;
-			default:
-				break;
-			}
-
-			return testLayer;
+            return eventDispatcherTestFunctions[index]();
 		}
 
 		protected override void NextTestCase()
@@ -107,7 +61,7 @@ namespace tests
 		public static CCLayer NextAction()
 		{
 			++sceneIndex;
-			sceneIndex = sceneIndex % (int)EventDispatchTests.TEST_CASE_COUNT;
+			sceneIndex = sceneIndex % MaxTests;
 
 			var testLayer = CreateLayer(sceneIndex);
 
@@ -118,7 +72,7 @@ namespace tests
 		{
 			--sceneIndex;
 			if (sceneIndex < 0)
-				sceneIndex += (int)EventDispatchTests.TEST_CASE_COUNT;
+				sceneIndex += MaxTests;
 
 			var testLayer = CreateLayer(sceneIndex);
 
@@ -193,10 +147,10 @@ namespace tests
 	public class MouseEventTest : EventDispatcherTest
 	{
 
-		CCLabelTtf mousePosition;
-		CCLabelTtf mouseButtonDown;
-		CCLabelTtf mouseButtonUp;
-		CCLabelTtf scrollWheel;
+		CCLabel mousePosition;
+		CCLabel mouseButtonDown;
+		CCLabel mouseButtonUp;
+		CCLabel scrollWheel;
 
 		public override void OnEnter ()
 		{
@@ -206,22 +160,22 @@ namespace tests
 
             int line = (int)(visibleBounds.Size.Height / 2);
 
-			mousePosition = new CCLabelTtf ("Mouse Position: ", "arial", 20);
+            mousePosition = new CCLabel ("Mouse Position: ", "arial", 20, CCLabelFormat.SpriteFont);
             mousePosition.Position = new CCPoint (130, line + 60);
 			mousePosition.AnchorPoint = CCPoint.AnchorMiddleLeft;
 			AddChild (mousePosition);
 
-			mouseButtonDown = new CCLabelTtf ("Mouse Button Down: ", "arial", 20);
+            mouseButtonDown = new CCLabel ("Mouse Button Down: ", "arial", 20, CCLabelFormat.SpriteFont);
             mouseButtonDown.Position = new CCPoint (130, line + 20);
 			mouseButtonDown.AnchorPoint = CCPoint.AnchorMiddleLeft;
 			AddChild (mouseButtonDown);
 
-			mouseButtonUp = new CCLabelTtf ("Mouse Button Up: ", "arial", 20);
+            mouseButtonUp = new CCLabel ("Mouse Button Up: ", "arial", 20, CCLabelFormat.SpriteFont);
             mouseButtonUp.Position = new CCPoint (130, line - 20);
 			mouseButtonUp.AnchorPoint = CCPoint.AnchorMiddleLeft;
 			AddChild (mouseButtonUp);
 
-			scrollWheel = new CCLabelTtf ("Scroll Wheel Delta: ", "arial", 20);
+            scrollWheel = new CCLabel ("Scroll Wheel Delta: ", "arial", 20, CCLabelFormat.SpriteFont);
             scrollWheel.Position = new CCPoint (130, line - 60);
 			scrollWheel.AnchorPoint = CCPoint.AnchorMiddleLeft;
 			AddChild (scrollWheel);
@@ -280,7 +234,7 @@ namespace tests
 			var origin = Layer.VisibleBoundsWorldspace.Origin;
 			var size = Layer.VisibleBoundsWorldspace.Size;
 
-			var statusLabel = new CCLabelTtf("No keyboard event received!", "arial", 20);
+            var statusLabel = new CCLabel("No keyboard event received!", "arial", 20, CCLabelFormat.SpriteFont);
 			statusLabel.Position = origin + size.Center;
 			AddChild(statusLabel);
 
@@ -337,6 +291,9 @@ namespace tests
 			// Create our Accelerometer Listener
 			var listener = new CCEventListenerAccelerometer();
 
+            if (!Window.Accelerometer.Enabled)
+                Window.Accelerometer.Enabled = true;
+
 			// We will use Lambda expressions to attach the event process
 			listener.OnAccelerate = (acceleration) => {
 				var ballSize  = sprite.ContentSize;
@@ -346,21 +303,22 @@ namespace tests
                 var orientation = Application.CurrentOrientation;
 
 				//CCLog.Log("Accelerate : X: {0} Y: {1} Z: {2} orientation: {3}", accelerationValue.X, accelerationValue.Y, accelerationValue.Z, orientation );
-				#if ANDROID || WINDOWS_PHONE8
-				if (orientation == CCDisplayOrientation.LandscapeRight)
-				{
-					ptNow.X -= (float) acc.X * 9.81f;
-					ptNow.Y -= (float) acc.Y * 9.81f;
-				}
-				else
-				{
-					ptNow.X += (float)acc.X * 9.81f;
-					ptNow.Y += (float)acc.Y * 9.81f;
-				}
-				#else
-				ptNow.X += (float)acc.X * 9.81f;
-				ptNow.Y += (float)acc.Y * 9.81f;
-				#endif
+                if (orientation == CCDisplayOrientation.LandscapeRight || orientation == CCDisplayOrientation.LandscapeLeft)
+                {
+
+#if ANDROID
+            
+                ptNow.X += (float) acc.Y * 9.81f;
+                ptNow.Y -= (float) acc.X * 9.81f;
+
+#elif NETFX_CORE || WINDOWS_PHONE8
+                    ptNow.X -= (float)acc.Y * 9.81f;
+                    ptNow.Y += (float)acc.X * 9.81f;
+#elif IOS
+                    ptNow.X += (float)acc.Y * 9.81f;
+                    ptNow.Y -= (float)acc.X * 9.81f;
+#endif
+                }
                 ptNow.X = MathHelper.Clamp(ptNow.X, (float)(visibleBounds.Origin.X+ballSize.Width / 2.0), (float)(visibleBounds.Origin.X + visibleBounds.Size.Width - ballSize.Width / 2.0));
                 ptNow.Y = MathHelper.Clamp(ptNow.Y, (float)(visibleBounds.Origin.Y+ballSize.Height / 2.0), (float)(visibleBounds.Origin.Y + visibleBounds.Size.Height - ballSize.Height / 2.0));
 				sprite.Position = ptNow;
@@ -451,11 +409,11 @@ namespace tests
 				target.Opacity = 255;
 				if (target == sprite2)
 				{
-					sprite1.LocalZOrder = 100;
+                    sprite1.ZOrder = 100;
 				}
 				else if(target == sprite1)
 				{
-					sprite1.LocalZOrder = 0;
+                    sprite1.ZOrder = 0;
 				}
 			};
 
@@ -467,7 +425,7 @@ namespace tests
 
 			var removeAllTouchItem = new CCMenuItemFont("Remove All Touch Listeners", (sender) => {
 				var senderItem = (CCMenuItemFont)sender;
-				senderItem.LabelTTF.Text = "Only Next item could be clicked";
+				senderItem.Label.Text = "Only Next item could be clicked";
 
                 RemoveEventListeners(CCEventListenerType.TOUCH_ONE_BY_ONE);
 
@@ -645,7 +603,7 @@ namespace tests
 
 			//MenuItemFont::setFontSize(20);
 
-			var statusLabel = new CCLabelTtf("No custom event 1 received!", "", 20);
+            var statusLabel = new CCLabel("No custom event 1 received!", "arial", 20, CCLabelFormat.SpriteFont);
 			statusLabel.Position = origin + new CCPoint(size.Width/2, size.Height-90);
 			AddChild(statusLabel);
 
@@ -669,7 +627,7 @@ namespace tests
 
 			sendItem.Position = origin + size.Center;
 
-			var statusLabel2 = new CCLabelTtf("No custom event 2 received!", "", 20);
+            var statusLabel2 = new CCLabel("No custom event 2 received!", "arial", 20, CCLabelFormat.SpriteFont);
 			statusLabel2.Position = origin + new CCPoint(size.Width/2, size.Height-120);
 			AddChild(statusLabel2);
 
@@ -913,7 +871,7 @@ namespace tests
 
 		int count1, count2, count3, count4;
 
-		CCLabelTtf label1, label2, label3, label4;
+		CCLabel label1, label2, label3, label4;
 		CCEventListenerCustom event1, event2, event3, event4;
 
 		public override void OnEnter ()
@@ -924,22 +882,22 @@ namespace tests
 			var origin = Layer.VisibleBoundsWorldspace.Origin;
 			var s = Layer.VisibleBoundsWorldspace.Size;
 
-			label1 = new CCLabelTtf("Update: 0", "arial", 20);
+            label1 = new CCLabel("Update: 0", "arial", 20, CCLabelFormat.SpriteFont);
 			label1.AnchorPoint = CCPoint.AnchorUpperLeft;
 			label1.Position = new CCPoint(30,s.Height/2 + 60);
 			AddChild(label1);
 
-			label2 = new CCLabelTtf("Visit: 0", "arial", 20);
+            label2 = new CCLabel("Visit: 0", "arial", 20, CCLabelFormat.SpriteFont);
 			label2.AnchorPoint = CCPoint.AnchorUpperLeft;
 			label2.Position = new CCPoint(30,s.Height/2 + 20);
 			AddChild(label2);
 
-			label3 = new CCLabelTtf("Draw: 0", "arial", 20);
+            label3 = new CCLabel("Draw: 0", "arial", 20, CCLabelFormat.SpriteFont);
 			label3.AnchorPoint = CCPoint.AnchorUpperLeft;
 			label3.Position = new CCPoint(30,s.Height/2 - 20);
 			AddChild(label3);
 
-			label4 = new CCLabelTtf("Projection: 0", "arial", 20);
+            label4 = new CCLabel("Projection: 0", "arial", 20, CCLabelFormat.SpriteFont);
 			label4.AnchorPoint = CCPoint.AnchorUpperLeft;
 			label4.Position = new CCPoint(30,s.Height/2 - 60);
 			AddChild(label4);
@@ -1041,7 +999,7 @@ namespace tests
                     sprite = new CCSprite("Images/CyanSquare.png") { Tag = TAG_SPRITE + i};
                     blueSprite = sprite;
                     //blueSprite.Scene = Scene;
-                    blueSprite.GlobalZOrder = -1;
+                    blueSprite.ZOrder = -1;
 
                 }
                 else
@@ -1113,12 +1071,9 @@ namespace tests
 			updateAccumulator += dt;
 			if ( updateAccumulator > 2.0f)
 			{
-				var z = blueSprite.GlobalZOrder;
-				var lz = blueSprite.LocalZOrder;  // Hack to get around no drawing by GlobalZOrder to move drawing in foreground and background
-				CCLog.Log("GlobalZOrder {0} - New GlobalZOrder {1}.  LocalZOrder {2} - New LocalZOrder {3}.  ", z, -z, lz, -lz);
-				blueSprite.GlobalZOrder = -z;
-				blueSprite.LocalZOrder = -lz;  // Hack to get around no drawing by GlobalZOrder to move drawing in foreground and background
-
+                var z = blueSprite.ZOrder;
+				CCLog.Log("ZOrder {0} - New ZOrder {1}.  ", z, -z);
+                blueSprite.ZOrder = -z;
 				updateAccumulator = 0;
 			}
 
@@ -1239,7 +1194,7 @@ namespace tests
 				{
 					var senderItem = (CCMenuItemFont) sender;
 
-					senderItem.LabelTTF.Text = "Only 'Reset' item could be clicked";
+					senderItem.Label.Text = "Only 'Reset' item could be clicked";
 
 					RemoveAllListeners();
 
@@ -1276,7 +1231,7 @@ namespace tests
 			customlistener = AddCustomEventListener(CCEvent.EVENT_COME_TO_BACKGROUND, (customEvent) => 
 				{
 
-					var label = new CCLabelTtf("Yeah, this issue was fixed.", "", 20);
+                    var label = new CCLabel("Yeah, this issue was fixed.", "", 20, CCLabelFormat.SpriteFont);
 					label.AnchorPoint = CCPoint.AnchorMiddleLeft;
                     label.Position = new CCPoint(visibleBounds.Origin.X, visibleBounds.Origin.Y + visibleBounds.Size.Height / 2);
 

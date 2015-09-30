@@ -13,37 +13,75 @@ namespace CocosSharp
         PlatformContents
     }
 
-    public partial class CCRenderTexture : CCNode
+    public class CCRenderTexture
     {
-        bool firstUsage = true;
+        [Flags]
+        enum ClearFlags
+        {
+            None = 0x0,
+            ColorBuffer = 0x1,
+            DepthBuffer = 0x2,
+            StencilBuffer = 0x4,
+            All = ~0x0
+        }
+
+        bool shouldClear;
+        CCColor4B clearColor;
+                
         RenderTarget2D renderTarget2D;
+        CCDrawManager drawManager;
+        CCRenderer renderer;
+
+        Matrix renderViewMatrix;
+        Matrix renderProjMatrix;
+        Viewport renderViewport;
+
+        CCCustomCommand beginCommand;
+        CCCustomCommand endCommand;
+
 
         #region Properties
 
-        public CCSprite Sprite { get; set; }
+        public CCSprite Sprite { get; private set; }
         public CCTexture2D Texture { get; private set; }
         protected CCSurfaceFormat PixelFormat { get; private set; }
 
+        CCColor4B ClearColor
+        {
+            get { return clearColor; }
+            set
+            {
+                clearColor = value;
+                shouldClear = true;
+            }
+        }
+
         #endregion Properties
+
 
 
         #region Constructors
 
         public CCRenderTexture()
         {
+            beginCommand = new CCCustomCommand(float.MinValue, OnBegin);
+            endCommand = new CCCustomCommand(float.MaxValue, OnEnd);
+
             PixelFormat = CCSurfaceFormat.Color;
+            drawManager = CCDrawManager.SharedDrawManager;
+            renderer = drawManager.Renderer;
         }
 
         public CCRenderTexture(CCSize contentSize, CCSize textureSizeInPixels, 
             CCSurfaceFormat colorFormat=CCSurfaceFormat.Color, 
             CCDepthFormat depthFormat=CCDepthFormat.None, 
-            CCRenderTargetUsage usage=CCRenderTargetUsage.DiscardContents)
+            CCRenderTargetUsage usage=CCRenderTargetUsage.DiscardContents) : this()
         {
             int textureWidth = (int)textureSizeInPixels.Width;
             int textureHeight = (int)textureSizeInPixels.Height;
 
-            firstUsage = true;
-            renderTarget2D = CCDrawManager.SharedDrawManager.CreateRenderTarget(textureWidth, textureHeight, colorFormat, depthFormat, usage);
+            renderTarget2D = drawManager.CreateRenderTarget(
+                textureWidth, textureHeight, colorFormat, depthFormat, usage);
 
             Texture = new CCTexture2D(renderTarget2D, colorFormat, true, false);
             Texture.IsAntialiased = false;
@@ -52,104 +90,69 @@ namespace CocosSharp
             Sprite.ContentSize = contentSize;
             Sprite.BlendFunc = CCBlendFunc.AlphaBlend;
 
-            AddChild(Sprite);
+            CCPoint center = contentSize.Center;
+
+            renderViewMatrix = 
+                Matrix.CreateLookAt(new CCPoint3(center, 300.0f).XnaVector, new CCPoint3(center, 0.0f).XnaVector, Vector3.Up);
+            renderProjMatrix = 
+                Matrix.CreateOrthographic(contentSize.Width, contentSize.Height, 1024f, -1024);
+            renderViewport = new Viewport(0, 0, textureWidth, textureHeight);
+
+
+            clearColor = CCColor4B.Transparent;
+            drawManager.SetRenderTarget(Texture);
+            drawManager.Clear(clearColor);
+            drawManager.RestoreRenderTarget();
         }
 
         #endregion Constructors
 
 
-        public virtual void Begin()
+        public void Begin()
+        {
+            renderer.PushGroup();
+            renderer.PushViewportGroup(ref renderViewport);
+            renderer.PushLayerGroup(ref renderViewMatrix, ref renderProjMatrix);
+            drawManager.Renderer.AddCommand(beginCommand);
+
+        }
+
+        void OnBegin()
         {
             CCDrawManager drawManager = CCDrawManager.SharedDrawManager;
 
-            // Save the current matrix
-            drawManager.PushMatrix();
-
-//            Matrix projection = Matrix.CreateOrthographicOffCenter(
-//                -1.0f / widthRatio, 1.0f / widthRatio,
-//                -1.0f / heightRatio, 1.0f / heightRatio,
-//                -1, 1
-//            );
-//
-//            drawManager.MultMatrix(ref projection);
-
             drawManager.SetRenderTarget(Texture);
 
-            if (firstUsage)
+            if(shouldClear)
             {
-                drawManager.Clear(CCColor4B.Transparent);
-                firstUsage = false;
+                drawManager.Clear(clearColor);
+                shouldClear = false;
             }
         }
 
-        public void BeginWithClear(float r, float g, float b, float a)
+        public void BeginWithClear(byte r, byte g, byte b, byte a, float depth = 1.0f, int stencil = 0)
         {
+            BeginWithClear(new CCColor4B(r, g, b, a), depth, stencil);
+        }
+
+        public void BeginWithClear(CCColor4B clearColor, float depth = 1.0f, int stencil = 0)
+		{
+            ClearColor = clearColor;
             Begin();
-            CCDrawManager.SharedDrawManager.Clear(new CCColor4B(r, g, b, a));
-        }
+		}
 
-        public void BeginWithClear(float r, float g, float b, float a, float depthValue)
+        public void End()
         {
-            Begin();
-            CCDrawManager.SharedDrawManager.Clear(new CCColor4B(r, g, b, a), depthValue);
+            renderer.AddCommand(endCommand);
+            renderer.PopLayerGroup();
+            renderer.PopViewportGroup();
+            renderer.PopGroup();
         }
 
-		public void BeginWithClear(float r, float g, float b, float a, float depthValue, int stencilValue)
-		{
-			Begin();
-			CCDrawManager.SharedDrawManager.Clear(new CCColor4B(r, g, b, a), depthValue, stencilValue);
-		}
-
-		public void BeginWithClear(CCColor4B col)
-		{
-			Begin();
-			CCDrawManager.SharedDrawManager.Clear(col);
-		}
-
-		public void BeginWithClear(CCColor4B col, float depthValue)
-		{
-			Begin();
-			CCDrawManager.SharedDrawManager.Clear(col, depthValue);
-		}
-
-		public void BeginWithClear(CCColor4B col, float depthValue, int stencilValue)
-		{
-			Begin();
-			CCDrawManager.SharedDrawManager.Clear(col, depthValue, stencilValue);
-		}
-
-        public void ClearDepth(float depthValue)
+        void OnEnd()
         {
-            Begin();
-            CCDrawManager.SharedDrawManager.Clear(ClearOptions.DepthBuffer, Microsoft.Xna.Framework.Color.White, depthValue, 0);
-            End();
+            drawManager.RestoreRenderTarget();
         }
-
-        public void ClearStencil(int stencilValue)
-        {
-            Begin();
-            CCDrawManager.SharedDrawManager.Clear(ClearOptions.Stencil, Microsoft.Xna.Framework.Color.White, 1, stencilValue);
-            End();
-        }
-
-        public virtual void End()
-        {
-            CCDrawManager.SharedDrawManager.PopMatrix();
-
-            CCDrawManager.SharedDrawManager.SetRenderTarget((CCTexture2D) null);
-        }
-
-		public void Clear(float r, float g, float b, float a)
-		{
-			BeginWithClear(r, g, b, a);
-			End();
-		}
-
-		public void Clear(CCColor4B col)
-		{
-			BeginWithClear(col);
-			End();
-		}
 
         public bool SaveToStream(Stream stream, CCImageFormat format)
         {

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{4EF34363-1190-4444-9F4B-7A262B397EE8}</ProjectGuid>
@@ -44,7 +44,7 @@
     <MtouchProfiling>True</MtouchProfiling>
     <MtouchI18n>
     </MtouchI18n>
-    <MtouchArch>ARMv7</MtouchArch>
+    <MtouchArch>i386, x86_64</MtouchArch>
     <MtouchExtraArgs>--linkskip=MonoGame.Framework</MtouchExtraArgs>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
@@ -73,7 +73,7 @@
     </IpaPackageName>
     <MtouchI18n>
     </MtouchI18n>
-    <MtouchArch>ARMv7</MtouchArch>
+    <MtouchArch>ARMv7, ARM64</MtouchArch>
     <CrashReportingApiKey>
     </CrashReportingApiKey>
     <MtouchLink>None</MtouchLink>
@@ -90,7 +90,7 @@
     <MtouchUseLlvm>True</MtouchUseLlvm>
     <MtouchI18n>
     </MtouchI18n>
-    <MtouchArch>ARMv7, ARMv7s</MtouchArch>
+    <MtouchArch>ARMv7, ARM64</MtouchArch>
     <MtouchSdkVersion>3.0</MtouchSdkVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -99,13 +99,13 @@
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
     <Reference Include="OpenTK-1.0" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ball-hd.mask" />
     <EmbeddedResource Include="grossini.mask" />
     <Compile Include="classes\AppDelegate.cs" />
     <Compile Include="classes\controller.cs" />
-    <Compile Include="classes\test.cs" />
     <Compile Include="classes\testBasic.cs" />
     <Compile Include="classes\testResource.cs" />
     <Compile Include="classes\TestNavigationLayer.cs" />
@@ -619,6 +619,7 @@
     <Compile Include="classes\tests\PerformanceTest\PerformBasicLayer.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="classes\tests\RendererTest\RendererTestDemo.cs" />
     <Compile Include="classes\tests\RenderTextureTest\RenderTextureCompositeTest.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -1130,16 +1131,51 @@
     <Compile Include="..\..\Extensions\GUI\CCScrollView\CCTableViewCell.cs">
       <Link>Extensions\GUI\CCScrollView\CCTableViewCell.cs</Link>
     </Compile>
+    <Compile Include="classes\tests\LabelTestNew\AtlasTestSceneNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTColorAndOpacity.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTMultiLine.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTMultiLineAlignment.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTOffset.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTPadding.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTSpriteActions.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelTestNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTBounds.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFLongLineWrapping.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTandSFEmpty.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTColor.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTHundredLabels.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTUNICODELanguages.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTRetina.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTGlyphDesigner.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelTTFAlignmentNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelTTFUnicodeChinese.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFAlignmentTest.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFColor.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontAlignmentTest.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontColor.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontUnicodeJapanese.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelTTFFontsTestNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFOldNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTFlippedY.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTOldNew.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTAdditionalKerningTest.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTContentSizeRatios.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFNTLineHeightTest.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSFContentSizeRatios.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFont168.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontRenderTexture.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelSystemFontColorAndOpacity.cs" />
+    <Compile Include="classes\tests\TextInputTest\CustomIME\IOS\UppercaseIMEKeyboardImpl.cs" />
+    <Compile Include="classes\tests\LabelTestNew\LabelFSTextureView.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Images\animationbuttonnormal.xnb" />
+    <Content Include="Content\Images\animationbuttonpressed.xnb" />
     <None Include="Info.iOS.plist">
       <Link>Info.plist</Link>
     </None>
-    <Content Include="Content\fonts\MarkerFelt-22.xnb" />
-    <Content Include="Content\fonts\MarkerFelt-18.xnb" />
-    <Content Include="Content\fonts\MarkerFelt-16.xnb" />
-    <Content Include="Content\fonts\MarkerFelt-Thin-12.xnb" />
-    <Content Include="Content\fonts\MarkerFelt-Thin-18.xnb" />
     <Content Include="Content\hd\Images\Icon.xnb" />
     <Content Include="Content\hd\Images\arrows.xnb" />
     <Content Include="Content\hd\Images\arrowsBar.xnb" />
@@ -1222,9 +1258,166 @@
     <Content Include="Content\hd\extensions\stepper-plus.xnb" />
     <Content Include="Content\hd\ccb\burst.xnb" />
     <Content Include="Content\hd\animations\dragon_animation.xnb" />
-    <Content Include="Content\fonts\MarkerFelt-32.xnb" />
     <Content Include="..\testsContent\Sounds\effect1.wav">
       <Link>Content\Sounds\effect1.wav</Link>
+    </Content>
+    <Content Include="..\testsContent\TileMaps\iso-test-zorder1.tmx">
+      <Link>Content\TileMaps\iso-test-zorder1.tmx</Link>
+    </Content>
+    <Content Include="Content\TileMaps\tilemap_no_encoding.xnb" />
+    <Content Include="Content\TileMaps\fixed-ortho-bgtiles.xnb" />
+    <Content Include="Content\TileMaps\orthogonal-test-multilayer.xnb" />
+    <Content Include="Content\TileMaps\orthogonal-test-polylines.xnb" />
+    <Content Include="Content\TileMaps\staggered_test.xnb" />
+    <Content Include="Content\TileMaps\large_map.xnb" />
+    <Content Include="..\testsContent\fonts\boundsTestFont.fnt">
+      <Link>Content\fonts\boundsTestFont.fnt</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\arial-26-en-ru_0.png">
+      <Link>Content\fonts\arial-26-en-ru_0.png</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\arial-26-en-ru.fnt">
+      <Link>Content\fonts\arial-26-en-ru.fnt</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\tahoma.ttf">
+      <Link>Content\fonts\tahoma.ttf</Link>
+    </Content>
+    <Content Include="Content\TileMaps\super_large_map.xnb" />
+    <Content Include="..\testsContent\fonts\boundsTestFont_0.png">
+      <Link>Content\fonts\boundsTestFont_0.png</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\HKYuanMini.ttf">
+      <Link>Content\fonts\HKYuanMini.ttf</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\Schwarzwald.ttf">
+      <Link>Content\fonts\Schwarzwald.ttf</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\American Typewriter.ttf">
+      <Link>Content\fonts\American Typewriter.ttf</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\Courier New.ttf">
+      <Link>Content\fonts\Courier New.ttf</Link>
+    </Content>
+    <Content Include="..\testsContent\fonts\MorrisRoman-Black.ttf">
+      <Link>Content\fonts\MorrisRoman-Black.ttf</Link>
+    </Content>
+    <Content Include="Content\TileMaps\desert-palace.xnb" />
+    <Content Include="Content\TileMaps\desert-palace-tiles.xnb" />
+    <Content Include="Content\TileMaps\lamp-16x16.xnb" />
+    <Content Include="Content\TileMaps\animation_diff_tile_dim.xnb" />
+    <Content Include="Content\TileMaps\animation_large_map.xnb" />
+    <Content Include="Content\TileMaps\desert-palace-multi-tileset.xnb" />
+    <Content Include="Content\TileMaps\people.xnb" />
+    <Content Include="..\testsContent\fonts\Marker Felt.ttf">
+      <Link>Content\fonts\Marker Felt.ttf</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\Images\blocks9ss.plist.xnb">
+      <Link>Content\Images\blocks9ss.plist.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\Images\blocks9.xnb">
+      <Link>Content\Images\blocks9.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\Images\blocks9r.xnb">
+      <Link>Content\Images\blocks9r.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\Images\blocks9ss.xnb">
+      <Link>Content\Images\blocks9ss.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\Images\ui.plist.xnb">
+      <Link>Content\Images\ui.plist.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\Images\ui.xnb">
+      <Link>Content\Images\ui.xnb</Link>
+    </Content>
+    <None Include="..\iOSContent\Content\fonts\debugfont.xnb">
+      <Link>Content\fonts\debugfont.xnb</Link>
+    </None>
+    <Content Include="..\iOSContent\Content\fonts\MarkerFelt-16.xnb">
+      <Link>Content\fonts\MarkerFelt-16.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\MarkerFelt-18.xnb">
+      <Link>Content\fonts\MarkerFelt-18.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\MarkerFelt-22.xnb">
+      <Link>Content\fonts\MarkerFelt-22.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\MarkerFelt-32.xnb">
+      <Link>Content\fonts\MarkerFelt-32.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\MarkerFelt-Thin-12.xnb">
+      <Link>Content\fonts\MarkerFelt-Thin-12.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\MarkerFelt-Thin-18.xnb">
+      <Link>Content\fonts\MarkerFelt-Thin-18.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\A Damn Mess-26.xnb">
+      <Link>Content\fonts\A Damn Mess-26.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\Abberancy-26.xnb">
+      <Link>Content\fonts\Abberancy-26.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\Abduction-26.xnb">
+      <Link>Content\fonts\Abduction-26.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-12.xnb">
+      <Link>Content\fonts\arial-12.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-16.xnb">
+      <Link>Content\fonts\arial-16.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-18.xnb">
+      <Link>Content\fonts\arial-18.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-20.xnb">
+      <Link>Content\fonts\arial-20.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-22.xnb">
+      <Link>Content\fonts\arial-22.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-26.xnb">
+      <Link>Content\fonts\arial-26.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-28.xnb">
+      <Link>Content\fonts\arial-28.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-30.xnb">
+      <Link>Content\fonts\arial-30.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-32.xnb">
+      <Link>Content\fonts\arial-32.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-34.xnb">
+      <Link>Content\fonts\arial-34.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-38.xnb">
+      <Link>Content\fonts\arial-38.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-50.xnb">
+      <Link>Content\fonts\arial-50.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-64.xnb">
+      <Link>Content\fonts\arial-64.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\Arial.xnb">
+      <Link>Content\fonts\Arial.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\arial-24.xnb">
+      <Link>Content\fonts\arial-24.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\Paint Boy-26.xnb">
+      <Link>Content\fonts\Paint Boy-26.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\Schwarzwald Regular-26.xnb">
+      <Link>Content\fonts\Schwarzwald Regular-26.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\Scissor Cuts-26.xnb">
+      <Link>Content\fonts\Scissor Cuts-26.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\debugcompressed.xnb">
+      <Link>Content\fonts\debugcompressed.xnb</Link>
+    </Content>
+    <Content Include="..\iOSContent\Content\fonts\debuguncompressed.xnb">
+      <Link>Content\fonts\debuguncompressed.xnb</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>
@@ -1316,28 +1509,8 @@
     <Content Include="Content\extensions\switch-on.xnb" />
     <Content Include="Content\extensions\switch-thumb.xnb" />
     <Content Include="Content\extensions\yellow_edit.xnb" />
-    <Content Include="Content\fonts\A Damn Mess-26.xnb" />
-    <Content Include="Content\fonts\Abberancy-26.xnb" />
-    <Content Include="Content\fonts\Abduction-26.xnb" />
-    <Content Include="Content\fonts\arial-12.xnb" />
-    <Content Include="Content\fonts\arial-16.xnb" />
-    <Content Include="Content\fonts\arial-18.xnb" />
-    <Content Include="Content\fonts\arial-20.xnb" />
-    <Content Include="Content\fonts\arial-22.xnb" />
-    <Content Include="Content\fonts\arial-24.xnb" />
-    <Content Include="Content\fonts\arial-26.xnb" />
-    <Content Include="Content\fonts\arial-28.xnb" />
-    <Content Include="Content\fonts\arial-30.xnb" />
-    <Content Include="Content\fonts\arial-32.xnb" />
-    <Content Include="Content\fonts\arial-34.xnb" />
-    <Content Include="Content\fonts\arial-38.xnb" />
-    <Content Include="Content\fonts\arial-50.xnb" />
-    <Content Include="Content\fonts\arial-64.xnb" />
     <Content Include="Content\fonts\arial-unicode-26.fnt.xnb" />
     <Content Include="Content\fonts\arial-unicode-26.xnb" />
-    <Content Include="Content\fonts\Arial.xnb" />
-    <Content Include="Content\fonts\arial16.fnt.xnb" />
-    <Content Include="Content\fonts\arial16.xnb" />
     <Content Include="Content\fonts\bitmapFontChinese.fnt.xnb" />
     <Content Include="Content\fonts\bitmapFontChinese.xnb" />
     <Content Include="Content\fonts\bitmapFontTest.fnt.xnb" />
@@ -1350,7 +1523,6 @@
     <Content Include="Content\fonts\bitmapFontTest4.xnb" />
     <Content Include="Content\fonts\bitmapFontTest5.fnt.xnb" />
     <Content Include="Content\fonts\bitmapFontTest5.xnb" />
-    <Content Include="Content\fonts\debugfont.xnb" />
     <Content Include="Content\fonts\font-issue1343-hd.fnt.xnb" />
     <Content Include="Content\fonts\font-issue1343-hd.xnb" />
     <Content Include="Content\fonts\font-issue1343.fnt.xnb" />
@@ -1367,9 +1539,6 @@
     <Content Include="Content\fonts\larabie-16.xnb" />
     <Content Include="Content\fonts\markerFelt.fnt.xnb" />
     <Content Include="Content\fonts\markerFelt.xnb" />
-    <Content Include="Content\fonts\Paint Boy-26.xnb" />
-    <Content Include="Content\fonts\Schwarzwald Regular-26.xnb" />
-    <Content Include="Content\fonts\Scissor Cuts-26.xnb" />
     <Content Include="Content\fonts\strings.plist.xnb" />
     <Content Include="Content\fonts\tuffy_bold_italic-charmap.plist.xnb" />
     <Content Include="Content\fonts\tuffy_bold_italic-charmap.xnb" />
@@ -1689,7 +1858,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
@@ -1715,9 +1883,9 @@
     <BundleResource Include="Resources\Default-568h%402x.png" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Content\hd\" />
-    <Folder Include="classes\tests\EventDispatcherTest\" />
-    <Folder Include="Extensions\" />
+    <Folder Include="classes\tests\TextInputTest\CustomIME\" />
+    <Folder Include="classes\tests\TextInputTest\CustomIME\IOS\" />
   </ItemGroup>
 </Project>

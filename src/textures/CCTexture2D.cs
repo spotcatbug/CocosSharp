@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -109,9 +110,20 @@ namespace CocosSharp
 
         CCTextureCacheInfo cacheInfo;
         Texture2D texture2D;
-
+        private readonly int textureId = Interlocked.Increment(ref lastTextureId);
+        private static int lastTextureId;
 
         #region Properties
+
+        /// <summary>
+        /// Gets a unique identifier of this texture for batch rendering purposes.
+        /// </summary>
+        /// <remarks>
+        /// <para>For example, this value is used by <see cref="CCRenderer"/> when determining batch rendering.</para>
+        /// <para>The value is an implementation detail and may change between application launches or CocosSharp versions.
+        /// It is only guaranteed to stay consistent during application lifetime.</para>
+        /// </remarks>
+        internal int TextureId { get { return textureId; } }
 
         public bool HasPremultipliedAlpha { get; private set; }
         public int PixelsWide { get; private set; }
@@ -962,29 +974,30 @@ namespace CocosSharp
         Texture2D LoadTextureFromTiff(Stream stream)
         {
 #if (WINDOWS && !NETFX_CORE)
-            var tiff = Tiff.ClientOpen("file.tif", "r", stream, new TiffStream());
-
-            var w = tiff.GetField(TiffTag.IMAGEWIDTH)[0].ToInt();
-            var h = tiff.GetField(TiffTag.IMAGELENGTH)[0].ToInt();
-
-            var raster = new int[w * h];
-
-            if (tiff.ReadRGBAImageOriented(w, h, raster, Orientation.LEFTTOP))
+            using (var tiff = Tiff.ClientOpen("file.tif", "r", stream, new TiffStream()))
             {
-                var result = new Texture2D(CCDrawManager.SharedDrawManager.XnaGraphicsDevice, w, h, false, SurfaceFormat.Color);
-                result.SetData(raster);
-                return result;
-            }
-            else 
-            {
-            return null;
+                var w = tiff.GetField(TiffTag.IMAGEWIDTH)[0].ToInt();
+                var h = tiff.GetField(TiffTag.IMAGELENGTH)[0].ToInt();
+
+                var raster = new int[w * h];
+
+                if (tiff.ReadRGBAImageOriented(w, h, raster, Orientation.LEFTTOP))
+                {
+                    var result = new Texture2D(CCDrawManager.SharedDrawManager.XnaGraphicsDevice, w, h, false, SurfaceFormat.Color);
+                    result.SetData(raster);
+                    return result;
+                }
+                else
+                {
+                    return null;
+                }
             }
 #elif MACOS || IOS
 
             return Texture2D.FromStream(CCDrawManager.SharedDrawManager.XnaGraphicsDevice, stream);
 #else
             return null;
-            #endif
+#endif
         }
 
         #endregion Loading Texture

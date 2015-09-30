@@ -5,7 +5,8 @@ using System.Text;
 
 namespace CocosSharp
 {
-    public class CCLabelBMFont : CCSpriteBatchNode, ICCTextContainer
+    [Obsolete("Use CCLabel instead.")]
+    public class CCLabelBMFont : CCNode, ICCTextContainer
     {
         public const int AutomaticWidth = -1;
 
@@ -27,15 +28,18 @@ namespace CocosSharp
 
         // Static properties
 
-        public new static float DefaultTexelToContentSizeRatio
+        public static float DefaultTexelToContentSizeRatio
         {
             set { DefaultTexelToContentSizeRatios = new CCSize(value, value); }
         }
 
-        public new static CCSize DefaultTexelToContentSizeRatios { get; set; }
+        public static CCSize DefaultTexelToContentSizeRatios { get; set; }
 
 
         // Instance properties
+
+        public CCTextureAtlas TextureAtlas { get ; private set; }
+        public CCBlendFunc BlendFunc { get; set; }
 
         protected int LineHeight { get; set; }
 
@@ -56,7 +60,7 @@ namespace CocosSharp
         {
             set
             {
-                if (!value.Equals(base.ScaleX) || !value.Equals(base.ScaleY)) 
+                if (!value.Equals(base.ScaleX) || !value.Equals(base.ScaleY))
                 {
                     base.Scale = value;
                     IsDirty = true;
@@ -69,7 +73,7 @@ namespace CocosSharp
             get { return base.ScaleX; }
             set
             {
-                if (!value.Equals(base.ScaleX)) 
+                if (!value.Equals(base.ScaleX))
                 {
                     base.ScaleX = value;
                     IsDirty = true;
@@ -82,7 +86,7 @@ namespace CocosSharp
             get { return base.ScaleY; }
             set
             {
-                if (!value.Equals(base.ScaleY)) 
+                if (!value.Equals(base.ScaleY))
                 {
                     base.ScaleY = value;
                     IsDirty = true;
@@ -206,7 +210,7 @@ namespace CocosSharp
 
                     FontConfiguration = newConf;
 
-                    Texture = CCTextureCache.SharedTextureCache.AddImage(FontConfiguration.AtlasName);
+                    TextureAtlas.Texture = CCTextureCache.SharedTextureCache.AddImage(FontConfiguration.AtlasName);
 
                     IsDirty = true;
                 }
@@ -242,7 +246,8 @@ namespace CocosSharp
             DefaultTexelToContentSizeRatios = CCSize.One;
         }
 
-        public CCLabelBMFont() : this("", "")
+        public CCLabelBMFont()
+            : this("", "")
         {
         }
 
@@ -261,7 +266,7 @@ namespace CocosSharp
         {
         }
 
-        public CCLabelBMFont(string str, string fntFile, float width, CCTextAlignment alignment, CCPoint imageOffset) 
+        public CCLabelBMFont(string str, string fntFile, float width, CCTextAlignment alignment, CCPoint imageOffset)
             : this(str, fntFile, width, alignment, imageOffset, null)
         {
         }
@@ -271,19 +276,19 @@ namespace CocosSharp
         {
         }
 
-        public CCLabelBMFont(string str, string fntFile, float width, CCTextAlignment hAlignment, CCVerticalTextAlignment vAlignment, 
+        public CCLabelBMFont(string str, string fntFile, float width, CCTextAlignment hAlignment, CCVerticalTextAlignment vAlignment,
             CCPoint imageOffset, CCTexture2D texture)
             : this(str, fntFile, new CCSize(width, 0), hAlignment, vAlignment, imageOffset, texture)
         {
         }
 
-        public CCLabelBMFont(string str, string fntFile, CCSize dimensions, CCTextAlignment hAlignment, CCVerticalTextAlignment vAlignment, 
+        public CCLabelBMFont(string str, string fntFile, CCSize dimensions, CCTextAlignment hAlignment, CCVerticalTextAlignment vAlignment,
             CCPoint imageOffset, CCTexture2D texture)
         {
             InitCCLabelBMFont(str, fntFile, dimensions, hAlignment, vAlignment, imageOffset, texture);
         }
 
-        protected void InitCCLabelBMFont(string theString, string fntFile, CCSize dimensions, CCTextAlignment hAlignment, CCVerticalTextAlignment vAlignment, 
+        protected void InitCCLabelBMFont(string theString, string fntFile, CCSize dimensions, CCTextAlignment hAlignment, CCVerticalTextAlignment vAlignment,
             CCPoint imageOffset, CCTexture2D texture)
         {
             Debug.Assert(FontConfiguration == null, "re-init is no longer supported");
@@ -340,7 +345,7 @@ namespace CocosSharp
                 theString = String.Empty;
             }
 
-            base.InitCCSpriteBatchNode(texture, theString.Length);
+            TextureAtlas = new CCTextureAtlas(texture, theString.Length);
 
             this.labelDimensions = dimensions;
 
@@ -432,7 +437,7 @@ namespace CocosSharp
 
             int nextFontPositionX = 0;
             int nextFontPositionY = 0;
-            char prev = (char) 255;
+            char prev = (char)255;
             int kerningAmount = 0;
 
             CCSize tmpSize = CCSize.Zero;
@@ -444,7 +449,7 @@ namespace CocosSharp
 
             if (String.IsNullOrEmpty(labelText))
             {
-                return; 
+                return;
             }
 
             int stringLen = labelText.Length;
@@ -488,7 +493,7 @@ namespace CocosSharp
                 if (charSet.IndexOf(c) == -1)
                 {
                     CCLog.Log("CocosSharp: CCLabelBMFont: Attempted to use character not defined in this bitmap: {0}",
-                        (int) c);
+                        (int)c);
                     continue;
                 }
 
@@ -497,7 +502,7 @@ namespace CocosSharp
                 // unichar is a short, and an int is needed on HASH_FIND_INT
                 if (!FontConfiguration.Glyphs.TryGetValue(c, out fontDef))
                 {
-                    CCLog.Log("CocosSharp: CCLabelBMFont: characer not found {0}", (int) c);
+                    CCLog.Log("CocosSharp: CCLabelBMFont: character not found {0}", (int)c);
                     continue;
                 }
 
@@ -510,7 +515,7 @@ namespace CocosSharp
                 CCSprite fontChar;
 
                 //bool hasSprite = true;
-                fontChar = (CCSprite) (this[i]);
+                fontChar = (CCSprite)(this[i]);
                 if (fontChar != null)
                 {
                     // Reusing previous Sprite
@@ -555,8 +560,8 @@ namespace CocosSharp
 
                 var fontPos =
                     new CCPoint(
-                        (float) nextFontPositionX + fontDef.XOffset + fontDef.Subrect.Size.Width * 0.5f + kerningAmount,
-                        (float) nextFontPositionY + yOffset - fontCharTextureRect.Size.Height * 0.5f);
+                        (float)nextFontPositionX + fontDef.XOffset + fontDef.Subrect.Size.Width * 0.5f + kerningAmount,
+                        (float)nextFontPositionY + yOffset - fontCharTextureRect.Size.Height * 0.5f);
 
                 fontChar.Position = fontPos;
 
@@ -573,7 +578,7 @@ namespace CocosSharp
             // If the last character processed has an xAdvance which is less that the width of the characters image, then we need
             // to adjust the width of the string to take this into account, or the character will overlap the end of the bounding
             // box
-            if (fontDef.XAdvance < fontDef.Subrect.Size.Width)
+            if (fontDef != null && fontDef.XAdvance < fontDef.Subrect.Size.Width)
             {
                 tmpSize.Width = longestLine + fontDef.Subrect.Size.Width - fontDef.XAdvance;
             }
@@ -655,7 +660,7 @@ namespace CocosSharp
                     CCSprite characterSprite;
                     int justSkipped = 0;
 
-                    while ((characterSprite = (CCSprite) this[(j + skip + justSkipped)]) == null)
+                    while ((characterSprite = (CCSprite)this[(j + skip + justSkipped)]) == null)
                     {
                         justSkipped++;
                     }
@@ -838,7 +843,7 @@ namespace CocosSharp
                         int index = i + line_length - 1 + lineNumber;
                         if (index < 0) continue;
 
-                        var lastChar = (CCSprite) this[index];
+                        var lastChar = (CCSprite)this[index];
                         if (lastChar == null)
                             continue;
 
@@ -846,7 +851,7 @@ namespace CocosSharp
 
                         var shift = maxLabelWidth - lineWidth;
                         if (horzAlignment == CCTextAlignment.Center)
-                                shift /= 2;
+                            shift /= 2;
 
                         for (int j = 0; j < line_length; j++)
                         {
@@ -920,14 +925,18 @@ namespace CocosSharp
             return pRet;
         }
 
-        protected override void Draw()
+        protected override void VisitRenderer(ref CCAffineTransform worldTransform)
+        {
+            Renderer.AddCommand(new CCCustomCommand(worldTransform.Tz, worldTransform, RenderLabel));
+        }
+
+        void RenderLabel()
         {
             if (IsDirty)
             {
                 UpdateLabel();
                 IsDirty = false;
             }
-            base.Draw();
         }
     }
 }

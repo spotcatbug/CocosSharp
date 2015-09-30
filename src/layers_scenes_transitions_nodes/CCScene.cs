@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Diagnostics;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace CocosSharp
 {
@@ -48,6 +49,7 @@ namespace CocosSharp
         CCSceneResolutionPolicy resolutionPolicy = CCSceneResolutionPolicy.ExactFit;
         CCViewport viewport;
         CCWindow window;
+        CCSize designResolutionSize = CCSize.Zero;
 
         // A delegate type for hooking up SceneViewport change notifications.
         internal delegate void SceneViewportChangedEventHandler(object sender, EventArgs e);
@@ -93,7 +95,15 @@ namespace CocosSharp
 		}
 #endif
 
-        public CCSize DesignResolutionSize { get; private set; }
+        public CCSize DesignResolutionSize 
+        { 
+            get { return designResolutionSize; }
+            private set 
+            { 
+                designResolutionSize = value;
+                AnchorPointInPoints = new CCPoint(ContentSize.Width * AnchorPoint.X, ContentSize.Height * AnchorPoint.Y);
+            } 
+        }
 
         public override CCSize ContentSize
         {
@@ -437,14 +447,15 @@ namespace CocosSharp
 		
 		#endregion
 
-        public override void Visit()
+        public override void Visit(ref CCAffineTransform parentWorldTransform)
         {
-            CCDrawManager drawManager = Window.DrawManager;
+            Viewport vp = Viewport.XnaViewport;
 
-            if(drawManager.CurrentRenderTarget == null)
-                drawManager.Viewport = Viewport.XnaViewport; 
+            Renderer.PushViewportGroup(ref vp);
 
-            base.Visit();
+            base.Visit(ref parentWorldTransform);
+
+            Renderer.PopViewportGroup();
         }
     }
 }

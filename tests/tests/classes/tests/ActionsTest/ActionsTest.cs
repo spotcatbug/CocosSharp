@@ -1,60 +1,10 @@
 using System;
 using System.Collections.Generic;
 using CocosSharp;
+using System.Threading.Tasks;
 
 namespace tests
 {
-    public enum ActionTest
-    {
-        ACTION_MANUAL_LAYER = 0,
-        ACTION_MOVE_LAYER,
-        ACTION_SCALE_LAYER,
-        ACTION_ROTATE_LAYER,
-        ACTION_SKEW_LAYER,
-        ACTION_ROTATIONAL_SKEW_LAYER,
-        ACTION_COMPARISON_SKEW_LAYER,
-        ACTION_SKEWROTATE_LAYER,
-        ACTION_JUMP_LAYER,
-        ACTION_CARDINALSPLINE_LAYER,
-        ACTION_CATMULLROM_LAYER,
-        ACTION_BEZIER_LAYER,
-        ACTION_BLINK_LAYER,
-        ACTION_FADE_LAYER,
-        ACTION_TINT_LAYER,
-        ACTION_ANIMATE_LAYER,
-        ACTION_SEQUENCE_LAYER,
-        ACTION_SEQUENCE2_LAYER,
-        ACTION_SPAWN_LAYER,
-        ACTION_REVERSE,
-        ACTION_DELAYTIME_LAYER,
-        ACTION_REPEAT_LAYER,
-        ACTION_REPEATEFOREVER_LAYER,
-        ACTION_ROTATETOREPEATE_LAYER,
-        ACTION_ROTATEJERK_LAYER,
-        ACTION_CALLFUNC_LAYER,
-        ACTION_CALLFUNCND_LAYER,
-        ACTION_REVERSESEQUENCE_LAYER,
-        ACTION_REVERSESEQUENCE2_LAYER,
-        ACTION_RemoveSelfActions,
-        ACTION_ORBIT_LAYER,
-        ACTION_FLLOW_LAYER,
-        ACTION_TARGETED_LAYER,
-        PAUSERESUMEACTIONS_LAYER,
-        ACTION_ISSUE1305_LAYER,
-        ACTION_ISSUE1305_2_LAYER,
-        ACTION_ISSUE1288_LAYER,
-        ACTION_ISSUE1288_2_LAYER,
-        ACTION_ISSUE1327_LAYER,
-        ACTION_ISSUE1389_LAYER,
-        ACTION_ActionMoveStacked,
-        ACTION_ActionMoveJumpStacked,
-        ACTION_ActionMoveBezierStacked,
-        ACTION_ActionCatmullRomStacked,
-        ACTION_ActionCardinalSplineStacked,
-        ACTION_PARALLEL,
-        ACTION_LAYER_COUNT
-    };
-
 
     // the class inherit from TestScene
     // every Scene each test used must inherit from TestScene,
@@ -63,161 +13,68 @@ namespace tests
     {
         static int actionIdx = -1;
 
+        static List<Func<CCLayer>> actionTestFunctions = new List<Func<CCLayer>> ()
+            {
+                () => new ActionManual(),
+                () => new ActionMove(),
+                () => new ActionScale(),
+                () => new ActionRotate(),
+                () => new ActionSkew(),
+                () => new ActionRotationalSkew(),
+                () => new ActionRotationalSkewVSStandardSkew(),
+                () => new ActionSkewRotateScale(),
+                () => new ActionJump(),
+                () => new ActionBezier(),
+                () => new ActionBlink(),
+                () => new ActionFade(),
+                () => new ActionTint(),
+                () => new ActionAnimate(),
+                () => new ActionSequence(),
+                () => new ActionSequence2(),
+                () => new ActionSpawn(),
+                () => new ActionReverse(),
+                () => new ActionDelayTime(),
+                () => new ActionRepeat(),
+                () => new ActionRepeatForever(),
+                () => new ActionRotateToRepeat(),
+                () => new ActionRotateJerk(),
+                () => new ActionCallFunc(),
+                () => new ActionCallFuncND(),
+                () => new ActionReverseSequence(),
+                () => new ActionReverseSequence2(),
+                () => new RemoveSelfActions(),
+                () => new ActionOrbit(),
+                () => new ActionFollow(),
+                () => new ActionTargeted(),
+                () => new Issue1305(),
+                () => new Issue1305_2(),
+                () => new Issue1288(),
+                () => new Issue1288_2(),
+                () => new Issue1327(),
+                () => new Issue1389(),
+                () => new ActionCardinalSpline(),
+                () => new ActionCatmullRom(),
+                () => new PauseResumeActions(),
+                () => new ActionMoveStacked(),
+                () => new ActionMoveJumpStacked(),
+                () => new ActionMoveBezierStacked(),
+                () => new ActionCatmullRomStacked(),
+                () => new ActionCardinalSplineStacked(),
+                () => new ActionParallel(),
+                () => new ActionSequenceAsync(),
+                () => new ActionSequenceAsync2(),
+            };
+
+
         public static CCLayer CreateLayer(int index)
         {
-            CCLayer layer = null;
-
-            switch (index)
-            {
-                case (int) ActionTest.ACTION_MANUAL_LAYER:
-                    layer = new ActionManual();
-                    break;
-                case (int) ActionTest.ACTION_MOVE_LAYER:
-                    layer = new ActionMove();
-                    break;
-                case (int) ActionTest.ACTION_SCALE_LAYER:
-                    layer = new ActionScale();
-                    break;
-                case (int) ActionTest.ACTION_ROTATE_LAYER:
-                    layer = new ActionRotate();
-                    break;
-                case (int) ActionTest.ACTION_SKEW_LAYER:
-                    layer = new ActionSkew();
-                    break;
-                case (int) ActionTest.ACTION_ROTATIONAL_SKEW_LAYER:
-                    layer = new ActionRotationalSkew();
-                    break;
-                case (int) ActionTest.ACTION_COMPARISON_SKEW_LAYER:
-                    layer = new ActionRotationalSkewVSStandardSkew();
-                    break;
-                case (int) ActionTest.ACTION_SKEWROTATE_LAYER:
-                    layer = new ActionSkewRotateScale();
-                    break;
-                case (int) ActionTest.ACTION_JUMP_LAYER:
-                    layer = new ActionJump();
-                    break;
-                case (int) ActionTest.ACTION_BEZIER_LAYER:
-                    layer = new ActionBezier();
-                    break;
-                case (int) ActionTest.ACTION_BLINK_LAYER:
-                    layer = new ActionBlink();
-                    break;
-                case (int) ActionTest.ACTION_FADE_LAYER:
-                    layer = new ActionFade();
-                    break;
-                case (int) ActionTest.ACTION_TINT_LAYER:
-                    layer = new ActionTint();
-                    break;
-                case (int) ActionTest.ACTION_ANIMATE_LAYER:
-                    layer = new ActionAnimate();
-                    break;
-                case (int) ActionTest.ACTION_SEQUENCE_LAYER:
-                    layer = new ActionSequence();
-                    break;
-                case (int) ActionTest.ACTION_SEQUENCE2_LAYER:
-                    layer = new ActionSequence2();
-                    break;
-                case (int) ActionTest.ACTION_SPAWN_LAYER:
-                    layer = new ActionSpawn();
-                    break;
-                case (int) ActionTest.ACTION_REVERSE:
-                    layer = new ActionReverse();
-                    break;
-                case (int) ActionTest.ACTION_DELAYTIME_LAYER:
-                    layer = new ActionDelayTime();
-                    break;
-                case (int) ActionTest.ACTION_REPEAT_LAYER:
-                    layer = new ActionRepeat();
-                    break;
-                case (int) ActionTest.ACTION_REPEATEFOREVER_LAYER:
-                    layer = new ActionRepeatForever();
-                    break;
-                case (int) ActionTest.ACTION_ROTATETOREPEATE_LAYER:
-                    layer = new ActionRotateToRepeat();
-                    break;
-                case (int) ActionTest.ACTION_ROTATEJERK_LAYER:
-                    layer = new ActionRotateJerk();
-                    break;
-                case (int) ActionTest.ACTION_CALLFUNC_LAYER:
-                    layer = new ActionCallFunc();
-                    break;
-                case (int) ActionTest.ACTION_CALLFUNCND_LAYER:
-                    layer = new ActionCallFuncND();
-                    break;
-                case (int) ActionTest.ACTION_REVERSESEQUENCE_LAYER:
-                    layer = new ActionReverseSequence();
-                    break;
-                case (int) ActionTest.ACTION_REVERSESEQUENCE2_LAYER:
-                    layer = new ActionReverseSequence2();
-                    break;
-                case (int)ActionTest.ACTION_RemoveSelfActions:
-                    layer = new RemoveSelfActions();
-                    break;
-                case (int) ActionTest.ACTION_ORBIT_LAYER:
-                    layer = new ActionOrbit();
-                    break;
-                case (int) ActionTest.ACTION_FLLOW_LAYER:
-                    layer = new ActionFollow();
-                    break;
-                case (int) ActionTest.ACTION_TARGETED_LAYER:
-                    layer = new ActionTargeted();
-                    break;
-                case (int) ActionTest.ACTION_ISSUE1305_LAYER:
-                    layer = new Issue1305();
-                    break;
-                case (int) ActionTest.ACTION_ISSUE1305_2_LAYER:
-                    layer = new Issue1305_2();
-                    break;
-                case (int) ActionTest.ACTION_ISSUE1288_LAYER:
-                    layer = new Issue1288();
-                    break;
-                case (int) ActionTest.ACTION_ISSUE1288_2_LAYER:
-                    layer = new Issue1288_2();
-                    break;
-                case (int) ActionTest.ACTION_ISSUE1327_LAYER:
-                    layer = new Issue1327();
-                    break;
-                case (int)ActionTest.ACTION_ISSUE1389_LAYER:
-                    layer = new Issue1389();
-                    break;
-                case (int) ActionTest.ACTION_CARDINALSPLINE_LAYER:
-                    layer = new ActionCardinalSpline();
-                    break;
-                case (int) ActionTest.ACTION_CATMULLROM_LAYER:
-                    layer = new ActionCatmullRom();
-                    break;
-                case (int) ActionTest.PAUSERESUMEACTIONS_LAYER:
-                    layer = new PauseResumeActions();
-                    break;
-                case (int)ActionTest.ACTION_ActionMoveStacked:
-                    layer = new ActionMoveStacked();
-                    break;
-                case (int)ActionTest.ACTION_ActionMoveJumpStacked:
-                    layer = new ActionMoveJumpStacked();
-                    break;
-                case (int)ActionTest.ACTION_ActionMoveBezierStacked:
-                    layer = new ActionMoveBezierStacked();
-                    break;
-                case (int)ActionTest.ACTION_ActionCatmullRomStacked:
-                    layer = new ActionCatmullRomStacked();
-                    break;
-                case (int)ActionTest.ACTION_ActionCardinalSplineStacked:
-                    layer = new ActionCardinalSplineStacked();
-                    break;
-                case (int)ActionTest.ACTION_PARALLEL:
-                    layer = new ActionParallel();
-                    break;
-                default:
-                    break;
-            }
-
-            return layer;
+            return actionTestFunctions[index]();
         }
 
         public static CCLayer NextAction()
         {
             ++actionIdx;
-            actionIdx = actionIdx % (int) ActionTest.ACTION_LAYER_COUNT;
+            actionIdx = actionIdx % (int)actionTestFunctions.Count;
 
             var layer = CreateLayer(actionIdx);
 
@@ -228,7 +85,7 @@ namespace tests
         {
             --actionIdx;
             if (actionIdx < 0)
-                actionIdx += (int) ActionTest.ACTION_LAYER_COUNT;
+                actionIdx += (int)actionTestFunctions.Count;
 
             var layer = CreateLayer(actionIdx);
 
@@ -628,8 +485,8 @@ namespace tests
         CCDrawNode box1;
         CCDrawNode box2;
 
-        CCLabelTtf boxLabel1;
-        CCLabelTtf boxLabel2;
+        CCLabel boxLabel1;
+        CCLabel boxLabel2;
 
         CCSkewBy actionTo;
         CCSkewBy actionToBack;
@@ -667,10 +524,10 @@ namespace tests
             box2.AnchorPoint = new CCPoint(0.5f, 0.5f);
             box2.IgnoreAnchorPointForPosition = false;
 
-            boxLabel1 = new CCLabelTtf("Standard cocos2d Skew", "Marker Felt", 16);
+            boxLabel1 = new CCLabel("Standard cocos2d Skew", "Marker Felt", 16, CCLabelFormat.SpriteFont);
             this.AddChild(boxLabel1);
 
-            boxLabel2 = new CCLabelTtf("Rotational Skew", "Marker Felt", 16);
+            boxLabel2 = new CCLabel("Rotational Skew", "Marker Felt", 16, CCLabelFormat.SpriteFont);
             this.AddChild(boxLabel2);
 
             actionTo = new CCSkewBy(2, 360, 0);
@@ -1258,7 +1115,7 @@ namespace tests
         void Callback1()
         {
             var s = Layer.VisibleBoundsWorldspace.Size;
-            var label = new CCLabelTtf("callback 1 called", "arial", 16);
+            var label = new CCLabel("callback 1 called", "arial", 16, CCLabelFormat.SpriteFont);
             label.Position = new CCPoint(s.Width / 4 * 1, s.Height / 2);
 
             AddChild(label);
@@ -1267,7 +1124,7 @@ namespace tests
         void Callback2(CCNode sender)
         {
             var s = Layer.VisibleBoundsWorldspace.Size;
-            var label = new CCLabelTtf("callback 2 called", "arial", 16);
+            var label = new CCLabel("callback 2 called", "arial", 16, CCLabelFormat.SpriteFont);
             label.Position = new CCPoint(s.Width / 4 * 2, s.Height / 2);
 
             AddChild(label);
@@ -1276,7 +1133,7 @@ namespace tests
         void Callback3(CCNode sender, object data)
         {
             var s = Layer.VisibleBoundsWorldspace.Size;
-            var label = new CCLabelTtf("callback 3 called", "arial", 16);
+            var label = new CCLabel("callback 3 called", "arial", 16, CCLabelFormat.SpriteFont);
             label.Position = new CCPoint(s.Width / 4 * 3, s.Height / 2);
 
             AddChild(label);
@@ -1285,6 +1142,161 @@ namespace tests
         #endregion Callbacks
     }
 
+    public class ActionSequenceAsync : ActionsDemo
+    {
+        CCSequence action;
+
+        #region Properties
+
+        public override string Subtitle
+        {
+            get { return "Sequence Await: Move + Rotate"; }
+        }
+
+        #endregion Properties
+
+
+        #region Constructors
+
+        public ActionSequenceAsync()
+        {
+            action = new CCSequence(new CCMoveBy (2, new CCPoint(240, 0)), new CCRotateBy (2, 540));
+        }
+
+        #endregion Constructors
+
+
+        #region Setup content
+
+        public override void OnEnter()
+        {
+
+            base.OnEnter(); 
+
+            AlignSpritesLeft(1);
+
+            RunAsyncAction ();
+        }
+
+        public async Task RunAsyncAction()
+        {
+            var task = Grossini.RunActionsAsync(action);
+
+            var s = Layer.VisibleBoundsWorldspace.Size;
+            var labelStart = new CCLabel("Start Async await Id = " + task.Id, "arial", 20, CCLabelFormat.SpriteFont);
+            labelStart.Position = new CCPoint(s.Width / 4 * 1, s.Height - (s.Height / 3));
+
+            AddChild(labelStart);
+
+            await task;
+
+            labelStart.Text = "End Async await Id = " + task.Id;
+        }
+
+
+        #endregion Setup content
+    }
+
+
+    public class ActionSequenceAsync2 : ActionsDemo
+    {
+        CCSequence action;
+
+
+        #region Properties
+
+        public override string Subtitle
+        {
+            get { return "Sequence of InstantActions Async"; }
+        }
+
+        #endregion Properties
+
+
+        #region Constructors
+
+        public ActionSequenceAsync2()
+        {
+            action = new CCSequence(
+                new CCPlace(new CCPoint(200, 200)),
+                new CCShow(),
+                new CCMoveBy (1, new CCPoint(100, 0)),
+                new CCDelayTime(1),
+                new CCCallFunc(Callback1),
+                new CCDelayTime(2),
+                new CCCallFuncN(Callback2),
+                new CCDelayTime(3),
+                new CCCallFuncND(Callback3, 0xbebabeba)
+
+            );
+        }
+
+        #endregion Constructors
+
+
+        #region Setup content
+
+        public override void OnEnter()
+        {
+
+            base.OnEnter(); 
+
+            AlignSpritesLeft(1);
+
+            Grossini.Visible = false;
+
+            RunAsyncAction ();
+        }
+
+        public async Task RunAsyncAction()
+        {
+            var task = Grossini.RunActionsAsync(action);
+
+            var s = Layer.VisibleBoundsWorldspace.Size;
+            var labelStart = new CCLabel("Start Async await Id = " + task.Id, "arial", 20, CCLabelFormat.SpriteFont);
+            labelStart.Position = new CCPoint(s.Width / 4 * 1, s.Height - (s.Height / 3));
+
+            AddChild(labelStart);
+
+            await task;
+
+            labelStart.Text = "End Async await Id = " + task.Id;
+        }
+
+        #endregion Setup content
+
+
+        #region Callbacks
+
+        void Callback1()
+        {
+            var s = Layer.VisibleBoundsWorldspace.Size;
+            var label = new CCLabel("callback 1 called", "arial", 16, CCLabelFormat.SpriteFont);
+            label.Position = new CCPoint(s.Width / 4 * 1, s.Height / 2);
+
+            AddChild(label);
+        }
+
+        void Callback2(CCNode sender)
+        {
+            var s = Layer.VisibleBoundsWorldspace.Size;
+            var label = new CCLabel("callback 2 called", "arial", 16, CCLabelFormat.SpriteFont);
+            label.Position = new CCPoint(s.Width / 4 * 2, s.Height / 2);
+
+            AddChild(label);
+        }
+
+        void Callback3(CCNode sender, object data)
+        {
+            var s = Layer.VisibleBoundsWorldspace.Size;
+            var label = new CCLabel("callback 3 called", "arial", 16, CCLabelFormat.SpriteFont);
+            label.Position = new CCPoint(s.Width / 4 * 3, s.Height / 2);
+
+            AddChild(label);
+        }
+
+        #endregion Callbacks
+    }
 
     public class ActionCallFunc : ActionsDemo
     {
@@ -1334,7 +1346,7 @@ namespace tests
         void Callback1()
         {
             var s = Layer.VisibleBoundsWorldspace.Size;
-            var label = new CCLabelTtf("callback 1 called", "arial", 16);
+            var label = new CCLabel("callback 1 called", "arial", 16, CCLabelFormat.SpriteFont);
             label.Position = new CCPoint(s.Width / 4 * 1, s.Height / 2);
 
             AddChild(label);
@@ -1343,7 +1355,7 @@ namespace tests
         void Callback2(CCNode sender)
         {
             var s = Layer.VisibleBoundsWorldspace.Size;
-            var label = new CCLabelTtf("callback 2 called", "arial", 16);
+            var label = new CCLabel("callback 2 called", "arial", 16, CCLabelFormat.SpriteFont);
             label.Position = new CCPoint(s.Width / 4 * 2, s.Height / 2);
 
             AddChild(label);
@@ -1352,7 +1364,7 @@ namespace tests
         void Callback3(CCNode target, object data)
         {
             var s = Layer.VisibleBoundsWorldspace.Size;
-            var label = new CCLabelTtf("callback 3 called", "arial", 16);
+            var label = new CCLabel("callback 3 called", "arial", 16, CCLabelFormat.SpriteFont);
             label.Position = new CCPoint(s.Width / 4 * 3, s.Height / 2);
             AddChild(label);
         }
@@ -1924,7 +1936,6 @@ namespace tests
     {
         readonly List<CCPoint> pointList = new List<CCPoint>();
 
-
         #region Properties
 
         public override string Title
@@ -1958,51 +1969,46 @@ namespace tests
             pointList.Add(new CCPoint(0, windowSize.Height - 80));
             pointList.Add(new CCPoint(0, 0));
 
+            //
+            // sprite 1 (By)
+            //
+            // Spline with no tension (tension==0)
+            //
+
             var action = new CCCardinalSplineBy (3, pointList, 0);
             var reverse = action.Reverse();
 
             var seq = new CCSequence(action, reverse);
 
-            var action2 = new CCCardinalSplineBy (3, pointList, 1);
-            var reverse2 = action2.Reverse();
-
-            var seq2 = new CCSequence(action2, reverse2);
-
             Tamara.Position = new CCPoint(50, 50);
             Tamara.RunAction(seq);
 
+            var drawNode1 = new CCDrawNode();
+            drawNode1.Position = new CCPoint(50,50);
+            drawNode1.DrawCardinalSpline (pointList, 0, 100, new CCColor4F(1.0f, 0.0f, 1.0f, 1.0f));
+            AddChild(drawNode1);
+
+
+            //
+            // sprite 2 (By)
+            //
+            // Spline with high tension (tension==1)
+            //
+
+            var action2 = new CCCardinalSplineBy (3, pointList, 1);
+            var reverse2 = action2.Reverse();
+
             Kathia.Position = new CCPoint(windowSize.Width / 2, 50);
-            Kathia.RunAction(seq2);
+            Kathia.RunActions(action2, reverse2);
+
+            var drawNode2 = new CCDrawNode();
+            drawNode2.Position = new CCPoint(windowSize.Width / 2,50);
+            drawNode2.DrawCardinalSpline (pointList, 1, 100, new CCColor4F(1.0f, 0.0f, 1.0f, 1.0f));
+            AddChild(drawNode2);        
         }
 
         #endregion Setup content
 
-
-        protected override void Draw()
-        {
-            base.Draw();
-
-			// move to 50,50 since the "by" path will start at 50,50
-            CCDrawingPrimitives.PushMatrix();
-            CCDrawingPrimitives.Translate(50, 50, 0);
-
-			CCDrawingPrimitives.Begin();
-            CCDrawingPrimitives.DrawCardinalSpline(pointList, 0, 100);
-			CCDrawingPrimitives.End();
-
-            CCDrawingPrimitives.PopMatrix();
-
-            var s = Layer.VisibleBoundsWorldspace.Size;
-
-            CCDrawingPrimitives.PushMatrix();
-            CCDrawingPrimitives.Translate(s.Width / 2, 50, 0);
-
-			CCDrawingPrimitives.Begin();
-            CCDrawingPrimitives.DrawCardinalSpline(pointList, 1, 100);
-			CCDrawingPrimitives.End();
-
-            CCDrawingPrimitives.PopMatrix();
-        }
     }
 
 
@@ -2010,7 +2016,6 @@ namespace tests
     {
         readonly List<CCPoint> pointList = new List<CCPoint>();
         readonly List<CCPoint> pointList2 = new List<CCPoint>();
-
 
         #region Properties
 
@@ -2037,6 +2042,13 @@ namespace tests
 
             CenterSprites(2);
 
+            //
+            // sprite 1 (By)
+            //
+            // startPosition can be any coordinate, but since the movement
+            // is relative to the Catmull Rom curve, it is better to start with (0,0).
+            //
+
             Tamara.Position = new CCPoint(50, 50);
 
             pointList.Clear();
@@ -2051,7 +2063,20 @@ namespace tests
 
             var action = new CCCatmullRomBy (3, pointList);
             var reverse = action.Reverse();
-            CCFiniteTimeAction seq = new CCSequence(action, reverse);
+
+            Tamara.RunActions(action, reverse);
+
+            var drawNode1 = new CCDrawNode();
+            drawNode1.Position = new CCPoint(50,50);
+            drawNode1.DrawCatmullRom(pointList, 50, new CCColor4F(1.0f, 0.0f, 1.0f, 1.0f));
+            AddChild(drawNode1);
+
+            //
+            // sprite 2 (To)
+            //
+            // The startPosition is not important here, because it uses a "To" action.
+            // The initial position will be the 1st point of the Catmull Rom path
+            //   
 
             pointList2.Clear();
 
@@ -2066,29 +2091,15 @@ namespace tests
 
             CCFiniteTimeAction seq2 = new CCSequence(action2, reverse2);
 
-            Tamara.RunAction(seq);
             Kathia.RunAction(seq2);
+
+            var drawNode2 = new CCDrawNode();
+            drawNode2.DrawCatmullRom(pointList2, 50, new CCColor4F(1.0f, 0.0f, 1.0f, 1.0f));
+            AddChild(drawNode2);
         }
 
         #endregion Setup content
 
-
-        protected override void Draw()
-        {
-            base.Draw();
-
-            // move to 50,50 since the "by" path will start at 50,50
-            CCDrawingPrimitives.PushMatrix();
-            CCDrawingPrimitives.Translate(50, 50, 0);
-            CCDrawingPrimitives.Begin();
-            CCDrawingPrimitives.DrawCatmullRom(pointList, 50);
-            CCDrawingPrimitives.End();
-            CCDrawingPrimitives.PopMatrix();
-
-            CCDrawingPrimitives.Begin();
-            CCDrawingPrimitives.DrawCatmullRom(pointList2, 50);
-            CCDrawingPrimitives.End();
-        }
     }
 
 
@@ -2375,18 +2386,17 @@ namespace tests
             var action = new CCCatmullRomBy(3, pointArray);
             var reverse = action.Reverse();
 
-            var seq = new CCSequence(action, reverse);
+            Tamara.RunActions(action, reverse);
 
-            Tamara.RunAction(seq);
-
-            Tamara.RunAction(
-                new CCRepeatForever(
-                    new CCSequence(
+            Tamara.RepeatForever(
                         new CCMoveBy(0.05f, new CCPoint(10, 0)),
                         new CCMoveBy(0.05f, new CCPoint(-10, 0))
-                    )
-                )
             );
+
+            var drawNode1 = new CCDrawNode();
+            drawNode1.Position = new CCPoint(50,50);
+            drawNode1.DrawCatmullRom(pointArray, 50, new CCColor4F(1.0f, 1.0f, 0.0f, 0.5f));
+            AddChild(drawNode1);
 
             //
             // sprite 2 (To)
@@ -2411,37 +2421,18 @@ namespace tests
 
             Kathia.RunAction(seq2);
 
-            Kathia.RunAction(
-                new CCRepeatForever(
-                    new CCSequence(
+            Kathia.RepeatForever(
                         new CCMoveBy(0.05f, new CCPoint(10, 0)),
                         new CCMoveBy(0.05f, new CCPoint(-10, 0))
-                    )
-                )
             );
 
+            var drawNode2 = new CCDrawNode();
+            drawNode2.DrawCatmullRom(pointArray2, 50, new CCColor4F(1.0f, 0.0f, 0.0f, 0.5f));
+            AddChild(drawNode2);
         }
 
         #endregion Setup content
 
-
-        protected override void Draw()
-        {
-            base.Draw();
-
-            // move to 50,50 since the "by" path will start at 50,50
-
-            CCDrawingPrimitives.PushMatrix();
-            CCDrawingPrimitives.Translate(50, 50, 0);
-			CCDrawingPrimitives.Begin();
-            CCDrawingPrimitives.DrawCatmullRom(pointArray, 50);
-			CCDrawingPrimitives.End();
-            CCDrawingPrimitives.PopMatrix();
-
-			CCDrawingPrimitives.Begin();
-            CCDrawingPrimitives.DrawCatmullRom(pointArray2, 50);
-			CCDrawingPrimitives.End();
-        }
     }
 
 
@@ -2490,19 +2481,19 @@ namespace tests
             var action = new CCCardinalSplineBy(3, pointArray, 0);
             var reverse = action.Reverse();
 
-            var seq = new CCSequence(action, reverse);
-
             Tamara.Position = new CCPoint(50, 50);
-            Tamara.RunAction(seq);
+            Tamara.RunActions(action, reverse);
 
-            Tamara.RunAction(
-                new CCRepeatForever(
-                    new CCSequence(
-                        new CCMoveBy(0.05f, new CCPoint(10, 0)),
-                        new CCMoveBy(0.05f, new CCPoint(-10, 0))
-                    )
-                )
+            Tamara.RepeatForever (
+                    new CCMoveBy(0.05f, new CCPoint(10, 0)),
+                    new CCMoveBy(0.05f, new CCPoint(-10, 0))
             );
+
+            var drawNode1 = new CCDrawNode();
+            drawNode1.Position = new CCPoint(50,50);
+            drawNode1.DrawCardinalSpline (pointArray, 0, 100, new CCColor4F(1.0f, 0.0f, 1.0f, 1.0f));
+            AddChild(drawNode1);
+
             //
             // sprite 2 (By)
             //
@@ -2512,47 +2503,22 @@ namespace tests
             var action2 = new CCCardinalSplineBy(3, pointArray, 1);
             var reverse2 = action2.Reverse();
 
-            var seq2 = new CCSequence(action2, reverse2);
-
             Kathia.Position = new CCPoint(windowSize.Width / 2, 50);
-            Kathia.RunAction(seq2);
+            Kathia.RunActions(action2, reverse2);
 
-            Kathia.RunAction(
-                new CCRepeatForever(
-                    new CCSequence(
+            Kathia.RepeatForever(
                         new CCMoveBy(0.05f, new CCPoint(10, 0)),
                         new CCMoveBy(0.05f, new CCPoint(-10, 0))
-                    )
-                )
             );
 
+            var drawNode2 = new CCDrawNode();
+            drawNode2.Position = new CCPoint(windowSize.Width / 2,50);
+            drawNode2.DrawCardinalSpline (pointArray, 1, 100, new CCColor4F(0.0f, 0.0f, 1.0f, 1.0f));
+            AddChild(drawNode2);   
         }
 
         #endregion Setup content
 
-
-        protected override void Draw()
-        {
-            base.Draw();
-
-            // move to 50,50 since the "by" path will start at 50,50
-
-            CCDrawingPrimitives.PushMatrix();
-            CCDrawingPrimitives.Translate(50, 50, 0);
-			CCDrawingPrimitives.Begin();
-            CCDrawingPrimitives.DrawCardinalSpline(pointArray, 0, 100);
-			CCDrawingPrimitives.End();
-            CCDrawingPrimitives.PopMatrix();
-
-            var s = Layer.VisibleBoundsWorldspace.Size;
-
-            CCDrawingPrimitives.PushMatrix();
-            CCDrawingPrimitives.Translate(s.Width / 2, 50, 0);
-			CCDrawingPrimitives.Begin();
-            CCDrawingPrimitives.DrawCardinalSpline(pointArray, 1, 100);
-			CCDrawingPrimitives.End();
-            CCDrawingPrimitives.PopMatrix();
-        }
     }
 
     #endregion

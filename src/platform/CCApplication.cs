@@ -23,6 +23,10 @@ using MonoGame.Framework.WindowsPhone;
 using Microsoft.Phone.Controls;
 #endif
 
+#if WINDOWS_PHONE81
+using Windows.Graphics.Display;
+#endif
+
 #if NETFX_CORE
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -110,7 +114,7 @@ namespace CocosSharp
             var graphics = new GraphicsDeviceManager(this);
             #endif
 
-            #if WINDOWS || WINDOWSGL || MACOS || NETFX_CORE
+            #if WINDOWS || WINDOWSGL || MACOS || (NETFX_CORE && !WINDOWS_PHONE81)
             this.IsMouseVisible = true;
             #endif
 
@@ -175,7 +179,7 @@ namespace CocosSharp
             base.Update(gameTime);
 
             // Allows the game to exit
-            #if (WINDOWS && !NETFX_CORE) || WINDOWSGL || WINDOWSDX || MACOS
+            #if (WINDOWS && !NETFX_CORE) || WINDOWSGL || WINDOWSDX// || MACOS
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
             Exit();
             #endif
@@ -242,42 +246,61 @@ namespace CocosSharp
 
         #region Properties
 
-        #if NETFX_CORE
+        #if NETFX_CORE && !WINDOWS_PHONE81
 
         public static void Create(CCApplicationDelegate appDelegate)
         {
-        Action<CCGame, Windows.ApplicationModel.Activation.IActivatedEventArgs> initAction =
-        delegate(CCGame game, Windows.ApplicationModel.Activation.IActivatedEventArgs args)
-        {
-        foreach (var component in game.Components)
-        {
-        if (component is CCApplication)
-        {
-        var instance = component as CCApplication;
-        instance.ApplicationDelegate = appDelegate;
-        }
-        }
-        };
-        var factory = new MonoGame.Framework.GameFrameworkViewSource<CCGame>(initAction);
-        Windows.ApplicationModel.Core.CoreApplication.Run(factory);
+            Action<CCGame, Windows.ApplicationModel.Activation.IActivatedEventArgs> initAction =
+            delegate(CCGame game, Windows.ApplicationModel.Activation.IActivatedEventArgs args)
+            {
+                foreach (var component in game.Components)
+                {
+                    if (component is CCApplication)
+                    {
+                        var instance = component as CCApplication;
+                        instance.ApplicationDelegate = appDelegate;
+                    }
+                }
+            };
+            var factory = new MonoGame.Framework.GameFrameworkViewSource<CCGame>(initAction);
+            Windows.ApplicationModel.Core.CoreApplication.Run(factory);
 
         }
 
         public static void Create(CCApplicationDelegate appDelegate, LaunchActivatedEventArgs args, Windows.UI.Core.CoreWindow coreWindow, SwapChainBackgroundPanel swapChainBackgroundPanel)
         {
-        var game = MonoGame.Framework.XamlGame<CCGame>.Create(args, coreWindow, swapChainBackgroundPanel);
-        foreach (var component in game.Components)
-        {
-        if (component is CCApplication)
-        {
-        var instance = component as CCApplication;
-        instance.ApplicationDelegate = appDelegate;
-        }
-        }
+            var game = MonoGame.Framework.XamlGame<CCGame>.Create(args, coreWindow, swapChainBackgroundPanel);
+            foreach (var component in game.Components)
+            {
+                if (component is CCApplication)
+                {
+                    var instance = component as CCApplication;
+                    instance.ApplicationDelegate = appDelegate;
+                }
+            }
 
         }
 
         #endif
+
+#if WINDOWS_PHONE81
+
+        public static void Create(CCApplicationDelegate appDelegate, string launchArguments, Windows.UI.Core.CoreWindow coreWindow, SwapChainBackgroundPanel swapChainBackgroundPanel)
+        {
+            var game = MonoGame.Framework.XamlGame<CCGame>.Create(launchArguments, coreWindow, swapChainBackgroundPanel);
+            foreach (var component in game.Components)
+            {
+                if (component is CCApplication)
+                {
+                    var instance = component as CCApplication;
+                    instance.ApplicationDelegate = appDelegate;
+                }
+            }
+
+        }
+
+
+#endif
 
         #if WINDOWS_PHONE
 
@@ -302,9 +325,8 @@ namespace CocosSharp
             set 
             {
                 CCSprite.DefaultTexelToContentSizeRatios = value;
-                CCLabelTtf.DefaultTexelToContentSizeRatios = value;
-                CCLabelBMFont.DefaultTexelToContentSizeRatios = value;
                 CCTileMapLayer.DefaultTexelToContentSizeRatios = value;
+                CCLabel.DefaultTexelToContentSizeRatios = value;
             }
         }
 
@@ -550,6 +572,7 @@ namespace CocosSharp
                 windowSizeInPixels.Width = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
                 windowSizeInPixels.Height = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
                 #endif
+
             }
 
             xnaDeviceManager.IsFullScreen = isFullscreen;
@@ -559,6 +582,9 @@ namespace CocosSharp
                 CCDrawManager.SharedDrawManager 
                     = new CCDrawManager(xnaDeviceManager, windowSizeInPixels, PlatformSupportedOrientations());
             }
+
+            CurrentOrientation = (CCDisplayOrientation)xnaGame.Window.CurrentOrientation;
+
         }
 
         CCDisplayOrientation PlatformSupportedOrientations()
@@ -602,6 +628,25 @@ namespace CocosSharp
                     CCDisplayOrientation.Portrait | CCDisplayOrientation.PortraitDown;
                     break;
             }
+            #elif WINDOWS_PHONE81
+            var preferences = DisplayInformation.AutoRotationPreferences;
+            supportedOrientations = CCDisplayOrientation.Default;
+            if ((preferences & DisplayOrientations.Portrait) == DisplayOrientations.Portrait)
+            {
+                supportedOrientations |= CCDisplayOrientation.Portrait;
+            }
+            if ((preferences & DisplayOrientations.Landscape) == DisplayOrientations.Landscape)
+            {
+                supportedOrientations |= CCDisplayOrientation.LandscapeLeft;
+            }
+            if ((preferences & DisplayOrientations.LandscapeFlipped) == DisplayOrientations.LandscapeFlipped)
+            {
+                supportedOrientations |= CCDisplayOrientation.LandscapeRight;
+            }
+            if ((preferences & DisplayOrientations.PortraitFlipped) == DisplayOrientations.PortraitFlipped)
+            {
+                supportedOrientations |= CCDisplayOrientation.PortraitDown;
+            }
             #else
             supportedOrientations = CCDisplayOrientation.LandscapeLeft;
             #endif
@@ -613,6 +658,12 @@ namespace CocosSharp
         CCWindow AddWindow(CCSize screenSizeInPixels)
         {
             CCWindow window = new CCWindow(this, screenSizeInPixels, xnaGame.Window, xnaDeviceManager);
+
+            // We need to reset the device so internal variables are setup correctly when
+            // we need to draw primitives or visit nodes outside of the Scene Graph.  Example is
+            // when drawing to a render texture in a class.  If the device is not initialized correctly before
+            // the first application Draw() in the application occurs then drawing with primitives results in weird behaviour.
+            window.DrawManager.ResetDevice ();
 
             gameWindows.Add(window);
 
@@ -631,7 +682,16 @@ namespace CocosSharp
 
         public void PurgeAllCachedData()
         {
-            CCLabelBMFont.PurgeCachedData();
+            
+        }
+        
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                CCDrawManager.SharedDrawManager = null;
+            }
+            base.Dispose(disposing);
         }
 
         #endregion Cleaning up
@@ -755,7 +815,6 @@ namespace CocosSharp
             GameTime.IsRunningSlowly = gameTime.IsRunningSlowly;
             GameTime.TotalGameTime = gameTime.TotalGameTime;
 
-            #if !NETFX_CORE
             foreach(CCWindow window in gameWindows)
             {
                 if (window.Accelerometer != null 
@@ -765,9 +824,6 @@ namespace CocosSharp
                     window.Accelerometer.Update();
                 }
             }
-
-            #endif
-
 
             foreach (CCWindow window in gameWindows)
             {
